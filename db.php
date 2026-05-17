@@ -1,8 +1,8 @@
 <?php 
-    $host = "localhost";
+    $host = "mysql.railway.internal";
     $username = "root";
-    $password = "";
-    $database = "jilz_perfume_bar";
+    $password = "HbeDhrdaesrLUVfjlagZkPGKQNtKHtGz";
+    $database = "railway";
 
     $conn = mysqli_connect($host, $username, $password, $database);
 
