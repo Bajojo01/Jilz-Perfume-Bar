@@ -1,5 +1,5 @@
 <?php 
-    $host = "mysql://root:HbeDhrdaesrLUVfjlagZkPGKQNtKHtGz@autorack.proxy.rlwy.net:48427/railway";
+    $host = "autorack.proxy.rlwy.net";
     $username = "root";
     $password = "HbeDhrdaesrLUVfjlagZkPGKQNtKHtGz";
     $database = "railway";
