@@ -3,7 +3,7 @@
     $username = "root";
     $password = "HbeDhrdaesrLUVfjlagZkPGKQNtKHtGz";
     $database = "railway";
-    $port = 3306; // <-- Must define the port
+    $port = 48427; // <-- Must define the port
 
     $conn = mysqli_connect($host, $username, $password, $database, $port); 
 
