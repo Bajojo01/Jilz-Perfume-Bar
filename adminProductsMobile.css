@@ -1,0 +1,502 @@
+/* ============================================================
+   RESPONSIVE STYLES — manageProducts.php
+   Breakpoints: 956px (tablet), 440px (mobile), 360px (small)
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   956px — TABLET / NARROW DESKTOP
+   Sidebar collapses to top nav. Tables → card boxes.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  /* Layout */
+  body.adminBG {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  /* Sidebar → top nav */
+  .asidebar {
+    width: 100%;
+    height: auto;
+    padding: 14px 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .asidebar h1 {
+    font-size: 1.6rem;
+    padding: 0;
+    margin-bottom: 6px;
+  }
+
+  .roww {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .adminpic {
+    width: 3rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  #adminnameemail h3 {
+    font-size: 0.9rem;
+    color: var(--white);
+    margin: 0;
+  }
+
+  #adminnameemail p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+  }
+
+  .asidebar hr {
+    border-color: rgba(255, 255, 255, 0.15);
+    margin: 6px 0 0;
+  }
+
+  .asidebar ul {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0;
+    padding: 6px 0 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    list-style: none;
+  }
+
+  .asidebar ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .asidebar ul li {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .asidebar a {
+    font-size: 0.82rem;
+    padding: 7px 14px;
+    white-space: nowrap;
+    display: block;
+  }
+
+  /* Main content */
+  .ainfocontainer {
+    margin: 16px 16px 40px;
+    width: auto;
+    padding-top: 0;
+  }
+
+  .ainfocontainer > h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Product tab nav — horizontal scroll */
+  .prod-nav {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 1.25rem;
+    border-bottom: 1.5px solid #e0e0e0;
+  }
+
+  .prod-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .prod-tab {
+    flex-shrink: 0;
+    padding: 0.85rem 1.4rem 0.75rem;
+    font-size: 0.72rem;
+    gap: 3px;
+  }
+
+  .prod-tab .material-icons {
+    font-size: 1.2rem;
+  }
+
+  /* Section header */
+  .section-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 0.85rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .section-actions {
+    gap: 6px;
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* ── Bottle columns → mini tab switcher ── */
+  .bottle-cols {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Mini tab bar sits above the two sections */
+  .bottle-mini-tabs {
+    display: flex;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 1rem;
+  }
+
+  .bottle-mini-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    padding: 10px 0;
+    font-family: "Open Sans", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #aaa;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+
+  .bottle-mini-tab.active {
+    color: #191919;
+    border-bottom-color: #d4af37;
+  }
+
+  /* Hide inactive section */
+  .bottle-cols > div.bottle-section {
+    display: none;
+  }
+
+  .bottle-cols > div.bottle-section.active {
+    display: block;
+  }
+
+  /* Hide section h2 — tab label replaces it */
+  .bottle-section .section-header h2 {
+    display: none;
+  }
+
+  /* ── Tables → card boxes ──────────────────────────────── */
+
+  /* Remove the outer table-wrap scroll */
+  .table-wrap {
+    overflow: visible;
+    box-shadow: none;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .scroll-table {
+    max-height: unset;
+    overflow-y: visible;
+  }
+
+  /* Kill the normal table layout */
+  .table-wrap table {
+    display: block;
+    width: 100%;
+    border-collapse: unset;
+  }
+
+  /* Hide column headers */
+  .table-wrap table thead {
+    display: none;
+  }
+
+  /* tbody becomes a flex column of cards */
+  .table-wrap table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Each <tr> = one card */
+  .table-wrap table tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
+    padding: 14px 14px 12px;
+    transition:
+      box-shadow 0.2s,
+      transform 0.15s;
+  }
+
+  .table-wrap table tbody tr:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
+    transform: translateY(-1px);
+    background: #fff;
+  }
+
+  /* Each <td> = label stacked above value */
+  .table-wrap table tbody td {
+    display: flex !important;
+    flex-direction: column;
+    padding: 3px 0;
+    font-size: 13px;
+    text-align: left !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: #222;
+    vertical-align: unset;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* data-label as tiny uppercase header */
+  .table-wrap table tbody td::before {
+    content: attr(data-label);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #aaa;
+    margin-bottom: 2px;
+  }
+
+  /* Action cell (Edit / Delete) — pinned to bottom of card */
+  .table-wrap table tbody td:last-child {
+    flex-direction: row;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0 !important;
+  }
+
+  .table-wrap table tbody td:last-child::before {
+    content: "";
+  }
+
+  /* Thumbnail images inside cards */
+  .table-wrap table tbody td img {
+    width: 10rem;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+
+  /* Modals — bottom sheet */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px 20px 32px;
+    box-sizing: border-box;
+  }
+
+  .modal-box h2 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .forrow {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Delete modals */
+  .del-modal .modal-box {
+    max-height: 70vh;
+  }
+
+  .del-btns {
+    gap: 10px;
+  }
+  .del-btns .btn-confirm,
+  .del-btns .btn-cancel {
+    flex: 1;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   440px — MOBILE
+   1-column cards, compact sidebar, label left / value right.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 440px) {
+  /* Sidebar */
+  .asidebar {
+    padding: 12px 16px 0;
+  }
+  .asidebar h1 {
+    font-size: 1.4rem;
+  }
+  .adminpic {
+    width: 2.5rem;
+  }
+  #adminnameemail h3 {
+    font-size: 0.85rem;
+  }
+  #adminnameemail p {
+    font-size: 0.72rem;
+  }
+  .asidebar ul {
+    padding: 6px 0 8px;
+  }
+  .asidebar a {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  .asidebar a:hover {
+    border-radius: 6px;
+  }
+
+  /* Main */
+  .ainfocontainer {
+    margin: 12px 12px 32px;
+  }
+  .ainfocontainer > h1 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+  }
+
+  /* Tab nav */
+  .prod-tab {
+    padding: 0.75rem 1.1rem 0.65rem;
+    font-size: 0.68rem;
+  }
+  .prod-tab .material-icons {
+    font-size: 1.1rem;
+  }
+
+  /* Section header */
+  .section-header h2 {
+    font-size: 1.1rem;
+  }
+  .section-actions {
+    gap: 6px;
+  }
+
+  /* Filter & add buttons */
+  .filter-btn {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  .btn-add {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  .btn-add .material-icons {
+    font-size: 0.9rem;
+  }
+
+  /* Cards — label left / value right */
+  .table-wrap table tbody td {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .table-wrap table tbody td::before {
+    font-size: 10px;
+    min-width: 90px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  /* Keep action row right-aligned */
+  .table-wrap table tbody td:last-child {
+    justify-content: flex-end;
+  }
+
+  /* Thumbnail images */
+  .table-wrap table tbody td img {
+    width: 10rem;
+  }
+
+  /* Card padding */
+  .table-wrap table tbody tr {
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09);
+  }
+
+  /* Modals */
+  .modal-box {
+    max-height: 92vh;
+    padding: 20px 16px 28px;
+  }
+  .modal-box h2 {
+    font-size: 1.1rem;
+  }
+  .modal-box label {
+    font-size: 0.8rem;
+  }
+  .modal-box input,
+  .modal-box select,
+  .modal-box textarea {
+    font-size: 0.85rem;
+  }
+  .btn-submit {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   360px — VERY SMALL PHONES
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .ainfocontainer > h1 {
+    font-size: 1.3rem;
+  }
+
+  .prod-tab {
+    padding: 0.65rem 0.9rem 0.55rem;
+    font-size: 0.62rem;
+  }
+  .prod-tab .material-icons {
+    font-size: 1rem;
+  }
+
+  .table-wrap table tbody td::before {
+    min-width: 78px;
+    font-size: 9px;
+  }
+
+  .table-wrap table tbody td {
+    font-size: 11px;
+  }
+
+  .table-wrap table tbody tr {
+    padding: 9px 10px;
+  }
+
+  .modal-box {
+    max-height: 94vh;
+    padding: 18px 14px 24px;
+  }
+}

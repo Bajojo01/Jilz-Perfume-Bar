@@ -24,20 +24,20 @@ window.addEventListener('resize', resizeCarousel);
 
 /* PERFUME CATEGORY FILTER
    ------------------------------------------------------------ */
-var perfCat = document.getElementById('perfCat');
-if (perfCat) {
-  perfCat.addEventListener('change', function () {
-    fetch('filter.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'category=' + this.value
-    })
-      .then(function (res) { return res.text(); })
-      .then(function (data) {
-        document.getElementById('perfumeContainer').innerHTML = data;
-      });
-  });
-}
+// var perfCat = document.getElementById('perfCat');
+// if (perfCat) {
+//   perfCat.addEventListener('change', function () {
+//     fetch('filter.php', {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+//       body: 'category=' + this.value
+//     })
+//       .then(function (res) { return res.text(); })
+//       .then(function (data) {
+//         document.getElementById('perfumeContainer').innerHTML = data;
+//       });
+//   });
+// }
 
 
 /* PACKAGE IMAGE PREVIEW

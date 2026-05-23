@@ -1,8 +1,32 @@
 <?php
 session_start();
+// profile pic
+function getAvatarColor($username) {
+    $palette = [
+        ['bg' => '#EEEDFE', 'text' => '#3C3489'],
+        ['bg' => '#E1F5EE', 'text' => '#085041'],
+        ['bg' => '#FAECE7', 'text' => '#712B13'],
+        ['bg' => '#FBEAF0', 'text' => '#72243E'],
+        ['bg' => '#E6F1FB', 'text' => '#0C447C'],
+        ['bg' => '#EAF3DE', 'text' => '#27500A'],
+        ['bg' => '#FAEEDA', 'text' => '#633806'],
+        ['bg' => '#FCF0F0', 'text' => '#791F1F'],
+    ];
+    $hash = 0;
+    foreach (str_split($username) as $char) {
+        $hash = ord($char) + (($hash << 5) - $hash);
+    }
+    return $palette[abs($hash) % count($palette)];
+}
+
+$username   = $_SESSION['Username'] ?? 'Guest';
+$avatarColor = getAvatarColor($username);
+$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+
+
 require("db.php");
 
-$galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
+$galleryQuery = mysqli_query($conn, "SELECT * FROM Gallery_Pictures");
 ?>
 
 <!DOCTYPE html>
@@ -13,9 +37,9 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jilz Perfume Bar | About Us</title>
     <link rel="shortcut icon" href="assets/Logo_Tentative.png" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="mobileStyle.css">
     <script>
         function openDrawer() {
@@ -46,7 +70,13 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
 
         <?php if (isset($_SESSION['UserID']) || isset($_SESSION['AdminID'])): ?>
             <div class="drawerUserProfile" onclick="window.location.href='profile.php'">
-                <img src="assets/user.png" alt="Profile">
+                <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0;
+"><?= htmlspecialchars($avatarLetter) ?></div>
                 <span>My Profile</span>
             </div>
         <?php else: ?>
@@ -68,7 +98,14 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
     <!-- HEADER -->
     <Header>
         <div class="logo">
-            <img src="assets/Logo_Tentative.png">
+            <div class="logoBrand" onclick="window.location.href='index.php'">
+                <img src="assets/Logo_Tentative.png" alt="Jilz Logo">
+                <div class="logoDivider"></div>
+                <div class="logoBrandText">
+                    <span class="brandName">Jilz</span>
+                    <span class="brandSub">perfume bar</span>
+                </div>
+            </div>
         </div>
         <div id="nav" class="navs">
             <ul>
@@ -84,7 +121,13 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
 
         <?php if (isset($_SESSION['UserID']) || isset($_SESSION['AdminID'])): ?>
             <div class="userProfile" style="display: flex;">
-                <img onclick="window.location.href='profile.php'" src="assets/user.png" alt="User Profile">
+                 <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0; border:solid 1.5px; cursor: pointer;
+"onclick="window.location.href='profile.php'" ><?= htmlspecialchars($avatarLetter) ?></div>
             </div>
         <?php else: ?>
             <div class="loginOrSignup" style="display: flex;">
@@ -106,7 +149,6 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
 
     <!-- ABOUT SECTION -->
     <div class="aboutSection">
-        <p class="sectionLabel">About Us</p>
         <div class="aboutTextBlock">
             <h2>About Jilz Perfume Bar</h2>
             <p>At Jilz Perfume Bar, we believe that fragrance is more than just a scent. It is a personal expression, a memory, and a statement of style. Our mission is to make luxury-inspired perfumes accessible to everyone, offering high-quality fragrances that capture the essence of elegance without the high price tag. Each scent in our collection is carefully curated to suit different personalities, moods, and occasions, ensuring that there is something uniquely perfect for you.</p>
@@ -117,7 +159,6 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
     <!-- GALLERY -->
     <div class="aboutSectionFull galleryBg">
         <div class="galleryInner">
-            <p class="sectionLabel">Gallery</p>
             <h2 style="font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 300; color: #1a1a1a; margin: 0 0 0.4rem;">Photo Gallery</h2>
             <p style="font-size: 0.88rem; color: #999; margin: 0;">A glimpse into our events and setups.</p>
 
@@ -144,7 +185,6 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
 
     <!-- FAQ -->
     <div class="aboutSection">
-        <p class="sectionLabel">FAQ</p>
         <h2 style="font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 300; color: #1a1a1a; margin: 0 0 0.4rem;">Frequently Asked Questions</h2>
         <p style="font-size: 0.88rem; color: #999; margin: 0 0 0.5rem;">Everything you need to know before booking.</p>
 
@@ -162,7 +202,7 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
                 ["How long does the perfume bar stay at the venue?", "The service is available for up to 4 hours during your event time."],
                 ["Which locations do you cover?", "We currently cater to events within Luzon."],
                 ["Is there an additional travel fee for distant venues?", "Yes. For locations outside Meycauayan and Marilao, an additional travel fee applies depending on the distance."],
-                ["Are refunds available after cancellation?", "Yes. Refunds are available depending on the cancellation terms and conditions."],
+                ["Are refunds available after cancellation?", "Refunds are only available if the booking is canceled at least one (1) week before the scheduled event date. Cancellations made six (6) days or less before the event are no longer eligible for a refund."],
             ];
 
             foreach ($faqs as $i => $faq): $num = $i + 1;
@@ -187,20 +227,23 @@ $galleryQuery = mysqli_query($conn, "SELECT * FROM gallery_pictures");
         <div class="platforms">
             <img class="icons"
                 onclick="window.open('https://web.facebook.com/profile.php?id=100083402345862', '_blank')"
-                src="assets/facebook.png">
+                src="assets/facebook.png" alt="Facebook">
             <img class="icons"
-                onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=jilzevangelista@gmail.com', '_blank')"
-                src="assets/gmail.png">
+                onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=jenprado13@gmail.com', '_blank')"
+                src="assets/gmail.png" alt="Gmail">
             <img class="icons"
-                onclick="window.open('https://web.facebook.com/profile.php?id=100083402345862', '_blank')"
-                src="assets/contact.png">
+                onclick="window.location.href='tel:+639615517623'"
+                src="assets/contact.png"
+                alt="Contact">
         </div>
         <div class="footNavs">
             <ul>
-                <li><a href="index.php">Home</a></li>
+                <li><a href="#">Home</a></li>
                 <li><a href="packages.php">Packages</a></li>
                 <li><a href="perfumes.php">Perfumes</a></li>
+                <li><a href="booking.php">Booking</a></li>
                 <li><a href="aboutUs.php">About</a></li>
+                <li><a href="profile.php">Profile</a></li>
             </ul>
         </div>
         <div class="copyRight">

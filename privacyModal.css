@@ -1,0 +1,342 @@
+/* Privacy Policy & Terms Modal — Jilz Perfume Bar */
+
+/* Overlay backdrop */
+.privacyOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    animation: privacyFadeIn 0.3s ease;
+}
+
+.privacyOverlay.active {
+    display: flex;
+}
+
+@keyframes privacyFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Modal card */
+.privacyModal {
+    background: #fff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
+    animation: privacySlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+@keyframes privacySlideUp {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* Header */
+.privacyModalHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1.4rem 1.6rem 1.1rem;
+    border-bottom: 1px solid #ede8e0;
+    flex-shrink: 0;
+}
+
+.privacyModalHeader img {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.privacyModalHeaderText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.privacyModalHeaderText .privacyBrandName {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2b1a0f;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.privacyModalHeaderText .privacyBrandSub {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 0.65rem;
+    font-weight: 300;
+    font-style: italic;
+    color: #7a5c3a;
+    letter-spacing: 0.15em;
+    text-transform: lowercase;
+}
+
+.privacyModalTitle {
+    margin-left: auto;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #aaa;
+}
+
+/* Gold accent line */
+.privacyModalAccent {
+    height: 3px;
+    background: linear-gradient(to right, transparent, #D4AF37, transparent);
+    flex-shrink: 0;
+}
+
+/* Tab bar */
+.privacyTabs {
+    display: flex;
+    border-bottom: 1px solid #ede8e0;
+    flex-shrink: 0;
+}
+
+.privacyTab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #aaa;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    margin-bottom: -1px;
+}
+
+.privacyTab:hover {
+    color: #191919;
+}
+
+.privacyTab.active {
+    color: #191919;
+    border-bottom-color: #D4AF37;
+}
+
+/* Scrollable content area */
+.privacyContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1.8rem;
+    scroll-behavior: smooth;
+}
+
+.privacyContent::-webkit-scrollbar {
+    width: 6px;
+}
+
+.privacyContent::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+.privacyContent::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 999px;
+}
+
+/* Content panels */
+.privacyPanel {
+    display: none;
+    animation: privacyFadeIn 0.2s ease;
+}
+
+.privacyPanel.active {
+    display: block;
+}
+
+.privacyPanel h2 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #191919;
+    margin: 0 0 1.1rem;
+    line-height: 1.2;
+}
+
+.privacyPanel h3 {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2b1a0f;
+    margin: 1.4rem 0 0.45rem;
+}
+
+.privacyPanel p {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.8;
+    color: #555;
+    margin: 0 0 0.6rem;
+}
+
+.privacyPanel ul {
+    padding-left: 1.2rem;
+    margin: 0 0 0.8rem;
+}
+
+.privacyPanel ul li {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.75;
+    color: #555;
+    margin-bottom: 0.2rem;
+}
+
+.privacyPanel .privacyEffDate {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #D4AF37;
+    margin-bottom: 1rem;
+}
+
+/* Divider between sections */
+.privacyDivider {
+    height: 1px;
+    background: #ede8e0;
+    margin: 1.2rem 0;
+}
+
+/* Footer — checkbox + button */
+.privacyModalFooter {
+    padding: 1.1rem 1.8rem 1.4rem;
+    border-top: 1px solid #ede8e0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex-shrink: 0;
+    background: #faf9f7;
+    border-radius: 0 0 18px 18px;
+}
+
+.privacyCheckRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Custom checkbox */
+.privacyCheckbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    min-width: 1.1rem;
+    border: 1.5px solid #c8bba8;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    margin-top: 2px;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.privacyCheckbox:checked {
+    background: #D4AF37;
+    border-color: #D4AF37;
+}
+
+.privacyCheckbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0px;
+    width: 4px;
+    height: 8px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(40deg);
+}
+
+.privacyCheckLabel {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.55;
+    cursor: pointer;
+}
+
+.privacyCheckLabel strong {
+    color: #191919;
+}
+
+/* Confirm button */
+.privacyConfirmBtn {
+    width: 100%;
+    padding: 0.85rem;
+    background: #191919;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.privacyConfirmBtn.enabled {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.privacyConfirmBtn.enabled:hover {
+    background: #D4AF37;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .privacyModal {
+        max-height: 94vh;
+        border-radius: 14px;
+    }
+
+    .privacyContent {
+        padding: 1.2rem 1.2rem;
+    }
+
+    .privacyModalFooter {
+        padding: 1rem 1.2rem 1.2rem;
+    }
+
+    .privacyTab {
+        font-size: 0.65rem;
+        padding: 0.65rem 0.5rem;
+    }
+}

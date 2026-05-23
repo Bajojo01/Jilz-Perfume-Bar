@@ -10,7 +10,6 @@
   display: none;
 }
 
-/* Profile drawer hidden by default on all sizes */
 .profileNavDrawer,
 .profileNavOverlay,
 .profileBurger {
@@ -19,1957 +18,10 @@
 
 
 /* ============================================================
-   MOBILE STYLES - 440px and smaller
+   SHARED COMPONENT STYLES (outside media queries)
    ============================================================ */
-@media (max-width: 440px) {
 
-
-  /* HEADER - MOBILE */
-  Header {
-    height: auto;
-    padding: 0.85rem 1.25rem;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-  }
-
-  Header .logo img {
-    width: 2.8rem;
-    height: 2.8rem;
-  }
-
-  Header .navs {
-    display: none;
-  }
-
-  Header .loginOrSignup {
-    display: none !important;
-  }
-
-  Header .userProfile {
-    display: none !important;
-  }
-
-  header .userProfile {
-    display: none !important;
-  }
-
-  Header .burger {
-    display: flex;
-    padding: 0;
-    margin: 0;
-    align-items: center;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  Header .burger .material-icons {
-    font-size: 2.2rem;
-    color: var(--dark);
-  }
-
-
-  /* MOBILE NAV DRAWER - SLIDES IN FROM LEFT */
-  .mobileNavDrawer {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 75vw;
-    max-width: 300px;
-    height: 100vh;
-    background-color: var(--dark);
-    z-index: 99999;
-    flex-direction: column;
-    padding: 2rem 1.5rem;
-    box-sizing: border-box;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .mobileNavDrawer.open {
-    left: 0;
-  }
-
-  .mobileNavDrawer .drawerHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .mobileNavDrawer .drawerHeader img.drawerLogo {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .mobileNavDrawer .drawerClose {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-  }
-
-  /* Profile section top of drawer */
-  .mobileNavDrawer .drawerUserProfile {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .mobileNavDrawer .drawerUserProfile img {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .mobileNavDrawer .drawerUserProfile span {
-    color: var(--white);
-    font-size: 0.9rem;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .loginButton,
-  .mobileNavDrawer .drawerAuthBtns .signupButton {
-    width: 100%;
-    height: 2.6rem;
-    border-radius: 999px;
-    border: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .loginButton {
-    background-color: transparent;
-    color: var(--white);
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .loginButton:hover {
-    border-color: var(--gold);
-    color: var(--gold);
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .signupButton {
-    background-color: var(--gold);
-    color: var(--white);
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .signupButton:hover {
-    background-color: #b8943e;
-  }
-
-  .mobileNavDrawer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .mobileNavDrawer ul li a {
-    display: block;
-    color: var(--white);
-    text-decoration: none;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    transition: color 0.2s, padding-left 0.2s;
-  }
-
-  .mobileNavDrawer ul li a:hover {
-    color: var(--gold);
-    padding-left: 0.75rem;
-  }
-
-  .mobileNavOverlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 99998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .mobileNavOverlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-
-  /* ============================================================
-     PROFILE PAGE DRAWER - MOBILE (slides in from left like main nav)
-     ============================================================ */
-
-  /* Burger button fixed at top-right of screen */
-  .profileBurger {
-    display: flex;
-    position: fixed;
-    top: 1rem;
-    right: 1.25rem;
-    z-index: 9000;
-    background: var(--dark);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    width: 2.6rem;
-    height: 2.6rem;
-    font-size: 1.4rem;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  }
-
-  /* Overlay behind drawer */
-  .profileNavOverlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 99998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .profileNavOverlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  /* Drawer panel */
-  .profileNavDrawer {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 75vw;
-    max-width: 300px;
-    height: 100vh;
-    background-color: var(--dark);
-    z-index: 99999;
-    flex-direction: column;
-    padding: 2rem 1.5rem;
-    box-sizing: border-box;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .profileNavDrawer.open {
-    left: 0;
-  }
-
-  /* Drawer header row with logo and close button */
-  .profileDrawerHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .profileDrawerLogo {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .profileDrawerClose {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-  }
-
-  /* User info block inside drawer */
-  .profileDrawerUser {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
-  }
-
-  .profileDrawerUser img {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 50%;
-  }
-
-  .profileDrawerUser span {
-    color: var(--white);
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  /* Nav links inside profile drawer */
-  .profileNavDrawer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .profileNavDrawer ul li a {
-    display: block;
-    color: var(--white);
-    text-decoration: none;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    transition: color 0.2s, padding-left 0.2s;
-    cursor: pointer;
-  }
-
-  .profileNavDrawer ul li a:hover {
-    color: var(--gold);
-    padding-left: 0.75rem;
-  }
-
-  /* Hide desktop sidebars on mobile */
-  .psidebar,
-  .mypsidebar {
-    display: none !important;
-  }
-
-  /* Profile page layout becomes single column */
-  .profileBG,
-  .myprofileBG {
-    flex-direction: column;
-    padding-top: 4.5rem;
-  }
-
-  /* Info container fills width */
-  .infocontainer {
-    padding: 1.25rem 1rem 2rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .infocontainer h1 {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-  }
-
-  .infocon {
-    width: 100%;
-    padding: 1.25rem;
-    box-sizing: border-box;
-    border-radius: 14px;
-  }
-
-  /* Form rows stack vertically */
-  .prow {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .pcolumn {
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  .pcolumn input {
-    width: 100%;
-    box-sizing: border-box;
-    border-radius: 10px;
-    padding: 0.65rem 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  /* Edit and save buttons full width */
-  .edit {
-    width: 100%;
-    height: 2.8rem;
-    font-size: 0.95rem;
-    border-radius: 12px;
-    margin-top: 0.5rem;
-  }
-
-  .profBtn,
-  .editProf {
-    width: 100%;
-    flex-direction: column;
-    gap: 0.6rem;
-    align-items: stretch;
-  }
-
-  /* My bookings container */
-  .mybookingscontainer {
-    margin-left: 0;
-    width: 100%;
-    padding: 1rem 1rem 2rem;
-    box-sizing: border-box;
-    padding-top: 0rem;
-  }
-
-  .mybookingscontainer h1 {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    padding-top: 0;
-  }
-
-  /* Status filter cards scroll horizontally on small screens */
-  .statusFilterRow {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-
-  .statusFilterRow::-webkit-scrollbar {
-    display: none;
-  }
-
-  .statusFilterCard {
-    flex: 0 0 auto;
-    min-width: 80px;
-    padding: 10px 12px 8px;
-  }
-
-  .statusFilterCard .cardCount {
-    font-size: 22px;
-  }
-
-  /* Booking cards full width */
-  .myinfocon {
-    width: 100%;
-    padding: 1rem;
-    box-sizing: border-box;
-    border-radius: 14px;
-  }
-
-  .mybookingconfirmation {
-    width: 100%;
-    padding: 1rem;
-    box-sizing: border-box;
-  }
-
-  /* Info rows inside booking card stack vertically */
-  .myprow {
-    flex-direction: column;
-    gap: 0.2rem;
-    justify-content: flex-start;
-  }
-
-  /* Buttons in booking cards stack and fill width */
-  .profileButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .profileButtons .bookButton {
-    width: 100%;
-    height: 2.6rem;
-    font-size: 0.9rem;
-    border-radius: 10px;
-  }
-
-  /* Status and buttons row stacks */
-  .prow.booking-action-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  /* Booking details popup - full width on mobile */
-  .bookingDetails {
-    width: 96vw;
-    max-height: 70vh;
-    border-radius: 16px;
-  }
-
-  .bookingInfoGrid,
-  .generalInfoGrid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .bookingInfoGrid .infos:nth-child(4) {
-    grid-column: 1;
-  }
-
-  .customerSection h3 {
-    font-size: 1.5rem;
-  }
-
-  .sectionTitle {
-    font-size: 1.3rem;
-  }
-
-  /* Payment modal responsive */
-  .paymentBox {
-    width: 96vw;
-    max-height: 92vh;
-    border-radius: 14px;
-  }
-
-  .paymentBody {
-    flex-direction: column;
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .paymentLeft {
-    border-right: none;
-    border-bottom: 1px solid #ebebeb;
-    padding-right: 0;
-    padding-bottom: 1rem;
-  }
-
-  /* Cancel reason modal responsive */
-  .cancelReasonBox {
-    width: 92vw;
-    padding: 20px;
-  }
-
-  /* Rating modal responsive */
-  .ratingBox {
-    width: 92vw;
-    padding: 20px 16px;
-  }
-
-  /* HERO SECTION - MOBILE */
-  .heroSection {
-    padding-top: 4.5rem;
-  }
-
-  .heroSection .hero {
-    flex-direction: column;
-    padding: 2rem 1.25rem;
-    text-align: center;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .heroSection .hero .heroDescription {
-    width: 100%;
-    align-items: center;
-  }
-
-  .heroSection .hero .heroDescription h1 {
-    font-size: 1.7rem;
-    line-height: 1.25;
-  }
-
-  .heroSection .hero .heroDescription p {
-    font-size: 0.9rem;
-    max-width: 100%;
-  }
-
-  .heroPill {
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-  }
-
-  .heroBtns {
-    justify-content: center;
-  }
-
-  .heroButton {
-    padding: 0.65rem 1.4rem;
-    font-size: 0.75rem;
-  }
-
-  .heroSection .imgContainer {
-    width: 100%;
-    height: 70vw;
-    margin-left: 0;
-    border-width: 8px;
-    max-width: 380px;
-    position: relative;
-  }
-
-  /* Hide hero image slider arrows on mobile */
-  .heroSection .imgContainer button,
-  .heroSection #prev,
-  .heroSection #next,
-  .heroSection .prev,
-  .heroSection .next,
-  .heroSection [id="prev"],
-  .heroSection [id="next"] {
-    display: none !important;
-  }
-
-  .heroSection .hero .wrapper {
-    width: calc(100vw * 8);
-  }
-
-  .heroSection .hero .wrapper img {
-    width: 100vw;
-    height: 70vw;
-  }
-
-
-  /* PACKAGES SHORTCUT - MOBILE */
-
-  .pckagesShortcut::scroll-button(right),
-  .pckagesShortcut::scroll-button(left) {
-    display: none;
-  }
-
-  .pckagesShortcut {
-    margin: 1.5rem 1rem;
-    height: auto;
-    gap: 0.75rem;
-  }
-
-  .pckagesShortcut .pckages {
-    flex: 0 0 82vw;
-    height: auto;
-    min-height: 260px;
-  }
-
-  .pckagesShortcut .pckages .pButton button {
-    font-size: 0.9rem;
-  }
-
-  /* SEE MORE BUTTON - MOBILE */
-  .seeMore {
-    margin-top: 1.5rem;
-    margin-bottom: 1.25rem;
-    display: flex;
-    justify-content: center;
-  }
-
-  .seeMoreBtn {
-    margin-top: 0.5rem;
-  }
-
-
-  /* PERFUMES SHORTCUT - MOBILE */
-  .pfumesShortcut::scroll-button(right),
-  .pfumesShortcut::scroll-button(left) {
-    display: none;
-  }
-
-  .pfumesShortcut {
-    width: 92vw;
-    height: auto;
-    margin: 1.5rem auto;
-  }
-
-  .pfumesShortcut .pfumes {
-    flex: 0 0 72vw;
-    height: 16rem;
-  }
-
-  .pfumesShortcut .pfumes img {
-    width: 16rem;
-    height: 13rem;
-  }
-
-
-  /* SECTION HEADERS - MOBILE */
-  .sectionHeader {
-    font-size: 1.3rem;
-    padding-top: 2rem;
-    text-align: center;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-
-  /* BOOKING PROCESS - MOBILE */
-  .process {
-    gap: 1rem;
-    margin: 2rem 1rem;
-  }
-
-  .process .steps {
-    width: 42vw;
-    height: auto;
-    min-height: 110px;
-    padding: 1rem;
-    gap: 0.6rem;
-  }
-
-  .process .steps p {
-    font-size: 0.8rem;
-  }
-
-  .process .steps .material-icons {
-    font-size: 28px;
-    padding: 8px;
-  }
-
-
-  /* PACKAGE PAGE - MOBILE */
-  #packageTitle {
-    padding-top: 5.5rem;
-    font-size: 1.4rem;
-  }
-
-  .package {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.25rem;
-    margin: 1.5rem 1rem;
-  }
-
-  .card {
-    width: 100%;
-    max-width: 100%;
-    min-width: unset;
-    flex: unset;
-  }
-
-  .pkgStar {
-    font-size: 0.9rem;
-  }
-
-  .pkgRatingText {
-    font-size: 0.78rem;
-  }
-
-  .incl-tab {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.65rem;
-  }
-
-  .incl-layout {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .incl-visual img {
-    width: 100%;
-    height: auto;
-  }
-
-  .perfumeBar {
-    padding: 0 1rem;
-  }
-
-
-  /* PERFUME PAGE - MOBILE */
-
-  .perfumeDescription {
-    height: auto;
-    min-height: unset;
-    flex-direction: column;
-    align-items: stretch;
-    position: static;
-    overflow: visible;
-    background-color: transparent !important;
-    margin-top: 0;
-    padding-top: 0 !important;
-  }
-
-  .perfumeDescription {
-    margin-top: 0 !important;
-    padding-top: 4rem;
-    background-color: transparent !important;
-  }
-
-  .perfumeHero {
-    position: relative;
-    width: 100%;
-    height: 85vw;
-    overflow: hidden;
-  }
-
-  .perfumeDescription #perfumeBG {
-    width: 100%;
-    height: 85vw;
-    display: block;
-    object-fit: cover;
-    object-position: center top;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-  }
-
-  .perfumeHero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .perfumeDescription .perfumeImg {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    pointer-events: none;
-  }
-
-  .perfumeDescription .perfumeImg img {
-    width: auto;
-    height: 68vw;
-    max-height: 68vw;
-    max-width: 50vw;
-    object-fit: contain;
-    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.6));
-  }
-
-  .perfumeDescription .details {
-    flex-direction: column;
-    position: relative;
-    height: 55vw;
-    z-index: 1;
-    padding: 1.5rem 1.25rem 2rem;
-    width: 100%;
-    box-sizing: border-box;
-    background: #fff;
-    margin-top: 0;
-  }
-
-  .perfumeDescription .perfumeDetails {
-    width: 100%;
-    padding-left: 0;
-    margin-top: 0;
-  }
-
-  .perfumeDescription .perfumeDetails .inspiredBy {
-    font-size: 0.62rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #aaa;
-    margin-bottom: 0.2rem;
-  }
-
-  .perfumeDescription .perfumeDetails .perfumeName {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.15;
-    color: #1a1a1a;
-    margin-bottom: 0.75rem;
-  }
-
-  .perfumeDescription .perfumeDetails .desc {
-    font-size: 0.82rem;
-    line-height: 1.65;
-    color: #555;
-  }
-
-  .perfumeDescription .perfumeDetails .ingredientTitle {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    padding-top: 0.85rem;
-    padding-bottom: 0.35rem;
-  }
-
-  .perfumeDescription .ratingCount {
-    color: #888;
-  }
-
-  .perfumeDescription .star.empty {
-    color: #ddd;
-  }
-
-  #perfumeTitle {
-    font-size: 1.3rem;
-    padding-top: 2.5rem;
-  }
-
-  /* Perfume lists fix name wrapping */
-  .perfumeLists {
-    gap: 1.25rem;
-    padding: 0 1rem;
-    margin: 1.5rem 0;
-  }
-
-  .perfumeLists .perfumeCard {
-    width: 42vw;
-    height: auto;
-    min-height: 50vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .perfumeLists .perfumeCard img {
-    width: 100%;
-    height: 60%;
-    object-fit: contain;
-  }
-
-  .perfumeLists .perfumeTitle {
-    width: 100%;
-    padding: 0.4rem 0.3rem;
-    box-sizing: border-box;
-  }
-
-  .perfumeLists .perfumeTitle p {
-    font-size: 0.7rem;
-    text-align: center;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-  }
-
-  .ratingCount {
-    font-size: 0.75rem;
-  }
-
-  .star {
-    font-size: 1rem;
-  }
-
-
-  /* BOOKING PAGE - MOBILE */
-  .bookingContainer {
-    flex-direction: column;
-    padding-top: 5.5rem;
-    align-items: stretch;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    gap: 1.5rem;
-  }
-
-  .bookingContainer .packageBook {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .bookingContainer .packageBook label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 0.3rem;
-  }
-
-  .pckgSelected {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .pckgSelected h1 {
-    font-size: 1.3rem;
-    margin: 0;
-    flex: 1;
-    min-width: 0;
-    word-break: break-word;
-  }
-
-  .packageDropdown {
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .packageDropdown img {
-    width: 1.4rem;
-    height: 1.4rem;
-    cursor: pointer;
-  }
-
-  .packageList {
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    z-index: 100;
-    min-width: 160px;
-    max-width: 80vw;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-  }
-
-  .packageList a {
-    display: block;
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    color: #333;
-    text-decoration: none;
-    border-bottom: 1px solid #f0f0f0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .packageList a:last-child {
-    border-bottom: none;
-  }
-
-  .packageList a:hover {
-    background: #f9f9f9;
-  }
-
-  /* Perfume container 2-column grid */
-  .bookingContainer .packageBook .perfContainer {
-    width: 100%;
-    height: auto;
-    max-height: 26rem;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-    padding: 0.25rem;
-    box-sizing: border-box;
-  }
-
-  .bookingContainer .packageBook .perfContainer .perfCard {
-    width: 100%;
-    height: auto;
-    min-height: 8rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0.5rem 0.4rem;
-    box-sizing: border-box;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .bookingContainer .packageBook .perfContainer .perfCard img {
-    width: 70%;
-    height: auto;
-    max-height: 5rem;
-    object-fit: contain;
-  }
-
-  .bookingContainer .packageBook .perfContainer .perfCard p {
-    font-size: 0.68rem;
-    margin-top: 0.3rem;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-  }
-
-  .timeType {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .timeRange {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: nowrap;
-  }
-
-  .timeRange input[type="time"] {
-    flex: 1;
-    min-width: 0;
-    padding: 0.5rem 0.4rem;
-    font-size: 0.82rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-  }
-
-  .bookingContainer .packageBook .location #eventAddress,
-  #eventType {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.55rem 0.75rem;
-    font-size: 0.82rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-
-  .aboutSetup {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-    align-items: end;
-  }
-
-  .aboutSetup label {
-    font-size: 0.78rem !important;
-    display: block;
-    margin-bottom: 0.25rem;
-  }
-
-  .aboutSetup select {
-    width: 100%;
-    padding: 0.5rem 0.4rem;
-    font-size: 0.78rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-  }
-
-  .bookingContainer .infos {
-    width: 100%;
-    align-items: stretch;
-  }
-
-  .bookingContainer .infos .pics {
-    width: 100%;
-    height: 40vw;
-  }
-
-  .bookingContainer .infos .picCard,
-  .bookingContainer .infos .picCardSetup {
-    width: 100%;
-  }
-
-  .bookingContainer .infos .picCard img {
-    height: 40vw;
-    width: 40vw;
-  }
-
-  .bookingContainer .infos .notes textarea {
-    width: 100%;
-    box-sizing: border-box;
-    height: 80px;
-  }
-
-  .bookingContainer .infos .submit {
-    width: 100%;
-  }
-
-  .calendar {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 1rem;
-  }
-
-  .bookingContainer button {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .day {
-    padding: 8px 4px;
-    font-size: 0.78rem;
-  }
-
-  .popUp .notif {
-    width: 88vw;
-    height: auto;
-    padding: 2rem;
-    gap: 1.5rem;
-  }
-
-  .popUp .notif .icon img {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .popUp .notif button {
-    width: 70%;
-    height: 2.5rem;
-  }
-
-  .popUp .uSureBtn button {
-    width: 40%;
-  }
-
-
-  /* LOGIN AND SIGNUP - MOBILE */
-  .loginsignupBG {
-    background-attachment: scroll;
-  }
-
-  .loginsignuplogo {
-    width: 100%;
-    padding: 1rem;
-    position: relative;
-  }
-
-  .loginsignupheader {
-    display: none;
-  }
-
-  .loginsignup {
-    width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    padding: 2rem 1.5rem;
-    margin-left: 0;
-  }
-
-  .loginsignup h1 {
-    font-size: 1.8rem;
-  }
-
-  .username,
-  .password,
-  .confirmpassword {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-
-  /* ABOUT PAGE - MOBILE */
-  .aboutHero {
-    padding: 6rem 1.25rem 3rem;
-    min-height: 40vh;
-  }
-
-  .aboutHero h1 {
-    font-size: 1.8rem;
-  }
-
-  .aboutSection,
-  .galleryInner,
-  .aboutSectionFull {
-    padding: 2.5rem 1.25rem;
-  }
-
-  .galleryGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.6rem;
-  }
-
-  .galleryItem {
-    height: 130px;
-  }
-
-
-  /* FOOTER - MOBILE */
-  Footer .platforms {
-    gap: 1rem;
-    padding-top: 1.5rem;
-  }
-
-  Footer .platforms .icons {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  Footer .footNavs ul {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  Footer .copyRight {
-    font-size: 0.8rem;
-  }
-
-
-  /* REVIEWS - MOBILE */
-  .reviewsSummary {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .reviewsRight {
-    max-width: 100%;
-  }
-
-  .avgNumber {
-    font-size: 2.8rem;
-  }
-
-  .customerReviews {
-    padding: 2rem 1.25rem;
-  }
-
-}
-
-
-/* ============================================================
-   LARGER MOBILE - 441px up to 768px
-   ============================================================ */
-@media (max-width: 768px) and (min-width: 441px) {
-
-  Header {
-    height: auto;
-    padding: 0.9rem 1.5rem;
-  }
-
-  Header .logo img {
-    width: 3rem;
-    height: 3rem;
-  }
-
-  Header .navs {
-    display: none;
-  }
-
-  Header .loginOrSignup {
-    display: none !important;
-  }
-
-  Header .userProfile {
-    display: none !important;
-  }
-
-  header .userProfile {
-    display: none !important;
-  }
-
-  Header .burger {
-    display: flex;
-    padding-right: 0;
-    align-items: center;
-    cursor: pointer;
-  }
-
-  Header .burger .material-icons {
-    font-size: 2rem;
-    color: var(--dark);
-  }
-
-  .mobileNavDrawer {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 65vw;
-    max-width: 300px;
-    height: 100vh;
-    background-color: var(--dark);
-    z-index: 99999;
-    flex-direction: column;
-    padding: 2rem 1.5rem;
-    box-sizing: border-box;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .mobileNavDrawer.open {
-    left: 0;
-  }
-
-  .mobileNavDrawer .drawerHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .mobileNavDrawer .drawerHeader img.drawerLogo {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .mobileNavDrawer .drawerClose {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-  }
-
-  .mobileNavDrawer .drawerUserProfile {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .mobileNavDrawer .drawerUserProfile img {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .mobileNavDrawer .drawerUserProfile span {
-    color: var(--white);
-    font-size: 0.9rem;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .loginButton,
-  .mobileNavDrawer .drawerAuthBtns .signupButton {
-    width: 100%;
-    height: 2.6rem;
-    border-radius: 999px;
-    border: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .loginButton {
-    background-color: transparent;
-    color: var(--white);
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
-  }
-
-  .mobileNavDrawer .drawerAuthBtns .signupButton {
-    background-color: var(--gold);
-    color: var(--white);
-  }
-
-  .mobileNavDrawer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .mobileNavDrawer ul li a {
-    display: block;
-    color: var(--white);
-    text-decoration: none;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    transition: color 0.2s, padding-left 0.2s;
-  }
-
-  .mobileNavDrawer ul li a:hover {
-    color: var(--gold);
-    padding-left: 0.75rem;
-  }
-
-  .mobileNavOverlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 99998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .mobileNavOverlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  /* Hero arrows hide on larger mobile too */
-  .heroSection .imgContainer button,
-  .heroSection #prev,
-  .heroSection #next,
-  .heroSection .prev,
-  .heroSection .next {
-    display: none !important;
-  }
-
-  .seeMore {
-    margin-top: 1.5rem;
-    margin-bottom: 1.25rem;
-    display: flex;
-    justify-content: center;
-  }
-
-  .heroSection .hero {
-    flex-direction: column;
-    padding: 3rem 2rem;
-    text-align: center;
-    align-items: center;
-  }
-
-  .heroSection .hero .heroDescription {
-    width: 100%;
-    align-items: center;
-  }
-
-  .heroSection .imgContainer {
-    width: 80%;
-    max-width: 380px;
-    height: 60vw;
-    margin-left: 0;
-  }
-
-  .pckagesShortcut {
-    margin: 2rem 1.5rem;
-  }
-
-  .pckagesShortcut .pckages {
-    flex: 0 0 70vw;
-  }
-
-  .pfumesShortcut {
-    width: 90vw;
-  }
-
-  .pfumesShortcut .pfumes {
-    flex: 0 0 60vw;
-  }
-
-  /* Perfumes desktop-like description layout */
-  .perfumeDescription {
-    flex-direction: row;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .perfumeDescription #perfumeBG {
-    width: 50%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: auto;
-    object-fit: cover;
-  }
-
-  .perfumeDescription .details {
-    flex-direction: row;
-    padding: 2.5rem 1.5rem;
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    align-items: center;
-  }
-
-  .perfumeDescription .perfumeDetails {
-    width: 55%;
-  }
-
-  .perfumeDescription .perfumeImg {
-    display: flex;
-    width: 40%;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .perfumeDescription .perfumeImg img {
-    width: auto;
-    height: 68vw;
-    max-height: 68vw;
-    max-width: 50vw;
-    object-fit: contain;
-  }
-
-  /* Perfume card names fix wrapping */
-  .perfumeLists .perfumeCard {
-    width: 38vw;
-    height: auto;
-    min-height: 44vw;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .perfumeLists .perfumeCard img {
-    width: 100%;
-    height: 70%;
-    object-fit: contain;
-  }
-
-  .perfumeLists .perfumeTitle {
-    width: 100%;
-    padding: 0.4rem 0.3rem;
-    box-sizing: border-box;
-  }
-
-  .perfumeLists .perfumeTitle p {
-    font-size: 0.8rem;
-    white-space: normal;
-    word-break: break-word;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  /* Booking perfume grid */
-  .bookingContainer .packageBook .perfContainer {
-    width: 100%;
-    height: auto;
-    max-height: 28rem;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    box-sizing: border-box;
-  }
-
-  .bookingContainer .packageBook .perfContainer .perfCard {
-    width: 100%;
-    height: auto;
-    min-height: 9rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .bookingContainer .packageBook .perfContainer .perfCard p {
-    font-size: 0.75rem;
-    white-space: normal;
-    word-break: break-word;
-  }
-
-  .aboutSetup {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
-
-  .aboutSetup select {
-    width: 100%;
-  }
-
-  .packageList {
-    position: absolute;
-    top: 2rem;
-    left: 10rem;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    z-index: 100;
-    min-width: 160px;
-    max-width: 80vw;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
-  }
-
-  .packageList a {
-    display: block;
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    color: #333;
-    text-decoration: none;
-    border-bottom: 1px solid #f0f0f0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .packageList a:last-child {
-    border-bottom: none;
-  }
-
-  /* Profile pages - larger mobile */
-  .profileBurger {
-    display: flex;
-    position: fixed;
-    top: 1rem;
-    right: 1.5rem;
-    z-index: 9000;
-    background: var(--dark);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    width: 2.8rem;
-    height: 2.8rem;
-    font-size: 1.5rem;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  }
-
-  .profileNavOverlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 99998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .profileNavOverlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .profileNavDrawer {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: -100%;
-    width: 65vw;
-    max-width: 300px;
-    height: 100vh;
-    background-color: var(--dark);
-    z-index: 99999;
-    flex-direction: column;
-    padding: 2rem 1.5rem;
-    box-sizing: border-box;
-    transition: left 0.3s ease;
-    overflow-y: auto;
-  }
-
-  .profileNavDrawer.open {
-    left: 0;
-  }
-
-  .profileDrawerHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .profileDrawerLogo {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .profileDrawerClose {
-    background: none;
-    border: none;
-    color: var(--white);
-    font-size: 1.8rem;
-    cursor: pointer;
-    line-height: 1;
-    padding: 0;
-  }
-
-  .profileDrawerUser {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
-  }
-
-  .profileDrawerUser img {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 50%;
-  }
-
-  .profileDrawerUser span {
-    color: var(--white);
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .profileNavDrawer ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .profileNavDrawer ul li a {
-    display: block;
-    color: var(--white);
-    text-decoration: none;
-    font-size: 1.05rem;
-    letter-spacing: 0.05em;
-    padding: 1rem 0.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    transition: color 0.2s, padding-left 0.2s;
-    cursor: pointer;
-  }
-
-  .profileNavDrawer ul li a:hover {
-    color: var(--gold);
-    padding-left: 0.75rem;
-  }
-
-  /* Hide desktop sidebars */
-  .psidebar,
-  .mypsidebar {
-    display: none !important;
-  }
-
-  .profileBG,
-  .myprofileBG {
-    flex-direction: column;
-    padding-top: 4.5rem;
-  }
-
-  .infocontainer {
-    padding: 1.5rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .infocontainer h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .infocon {
-    width: 100%;
-    padding: 1.5rem;
-    box-sizing: border-box;
-  }
-
-  .prow {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .pcolumn {
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  .pcolumn input {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .edit {
-    width: 100%;
-    height: 2.8rem;
-    font-size: 0.95rem;
-    border-radius: 12px;
-  }
-
-  .profBtn,
-  .editProf {
-    width: 100%;
-    flex-direction: column;
-    gap: 0.6rem;
-    align-items: stretch;
-  }
-
-  .mybookingscontainer {
-    margin-left: 0;
-    width: 100%;
-    padding: 4.5rem 1.25rem 2rem;
-    box-sizing: border-box;
-  }
-
-  .mybookingscontainer h1 {
-    font-size: 2rem;
-    padding-top: 0;
-    margin-bottom: 1rem;
-  }
-
-  .statusFilterRow {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 8px;
-    scrollbar-width: none;
-  }
-
-  .statusFilterRow::-webkit-scrollbar {
-    display: none;
-  }
-
-  .statusFilterCard {
-    flex: 0 0 auto;
-    min-width: 90px;
-  }
-
-  .myinfocon {
-    width: 100%;
-    padding: 1.25rem;
-    box-sizing: border-box;
-  }
-
-  .mybookingconfirmation {
-    width: 100%;
-    padding: 1rem;
-    box-sizing: border-box;
-  }
-
-  .myprow {
-    flex-direction: column;
-    gap: 0.2rem;
-    justify-content: flex-start;
-  }
-
-  .profileButtons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-  }
-
-  .profileButtons .bookButton {
-    width: 100%;
-    height: 2.6rem;
-    font-size: 0.9rem;
-    border-radius: 10px;
-  }
-
-  .bookingDetails {
-    width: 96vw;
-    max-height: 92vh;
-  }
-
-  .bookingInfoGrid,
-  .generalInfoGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .paymentBox {
-    width: 96vw;
-    max-height: 92vh;
-  }
-
-  .paymentBody {
-    flex-direction: column;
-    padding: 1rem;
-  }
-
-  .paymentLeft {
-    border-right: none;
-    border-bottom: 1px solid #ebebeb;
-    padding-right: 0;
-    padding-bottom: 1rem;
-  }
-
-  .cancelReasonBox {
-    width: 92vw;
-  }
-
-  .ratingBox {
-    width: 92vw;
-  }
-
-}
-
-/* history addition */
+/* Rating Modal */
 .ratingModal {
   display: none;
   position: fixed;
@@ -2143,6 +195,7 @@
   font-size: 0.85rem;
 }
 
+/* Refund Image */
 .refundImgWrap {
   display: flex;
   flex-direction: column;
@@ -2176,6 +229,7 @@
   text-align: center;
 }
 
+/* Cancellation Reason */
 .cancellationReasonWrap {
   display: flex;
   flex-direction: column;
@@ -2226,4 +280,2017 @@
   color: #5a1a1a;
   margin: 0;
   line-height: 1.6;
+}
+
+
+/* ============================================================
+   MOBILE - 440px and smaller
+   ============================================================ */
+@media (max-width: 500px) {
+
+  /* --- HEADER --- */
+  Header {
+    height: auto;
+    padding: 0.85rem 1.25rem;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  Header .logo img {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  Header .navs,
+  Header .loginOrSignup,
+  Header .userProfile,
+  header .userProfile {
+    display: none !important;
+  }
+
+  Header .burger {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  Header .burger .material-icons {
+    font-size: 2.2rem;
+    color: var(--dark);
+  }
+
+
+  /* --- MOBILE NAV DRAWER --- */
+  .mobileNavDrawer {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 75vw;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--dark);
+    z-index: 99999;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .mobileNavDrawer.open {
+    left: 0;
+  }
+
+  .mobileNavDrawer .drawerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .mobileNavDrawer .drawerHeader img.drawerLogo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .mobileNavDrawer .drawerClose {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .mobileNavDrawer .drawerUserProfile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .mobileNavDrawer .drawerUserProfile img {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .mobileNavDrawer .drawerUserProfile span {
+    color: var(--white);
+    font-size: 0.9rem;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .loginButton,
+  .mobileNavDrawer .drawerAuthBtns .signupButton {
+    width: 100%;
+    height: 2.6rem;
+    border-radius: 999px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .loginButton {
+    background-color: transparent;
+    color: var(--white);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .loginButton:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .signupButton {
+    background-color: var(--gold);
+    color: var(--white);
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .signupButton:hover {
+    background-color: #b8943e;
+  }
+
+  .mobileNavDrawer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobileNavDrawer ul li a {
+    display: block;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    transition: color 0.2s, padding-left 0.2s;
+  }
+
+  .mobileNavDrawer ul li a:hover {
+    color: var(--gold);
+    padding-left: 0.75rem;
+  }
+
+  .mobileNavOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobileNavOverlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+
+  /* --- PROFILE PAGE DRAWER --- */
+  .profileBurger {
+    display: flex;
+    position: fixed;
+    top: 1rem;
+    right: 1.25rem;
+    z-index: 9000;
+    background: var(--dark);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    width: 2.6rem;
+    height: 2.6rem;
+    font-size: 1.4rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .profileNavOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .profileNavOverlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .profileNavDrawer {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 75vw;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--dark);
+    z-index: 99999;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .profileNavDrawer.open {
+    left: 0;
+  }
+
+  .profileDrawerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .profileDrawerLogo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .profileDrawerClose {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .profileDrawerUser {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+  }
+
+  .profileDrawerUser img {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+  }
+
+  .profileDrawerUser span {
+    color: var(--white);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .profileNavDrawer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .profileNavDrawer ul li a {
+    display: block;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    transition: color 0.2s, padding-left 0.2s;
+    cursor: pointer;
+  }
+
+  .profileNavDrawer ul li a:hover {
+    color: var(--gold);
+    padding-left: 0.75rem;
+  }
+
+
+  /* --- HERO SECTION --- */
+  .heroSection {
+    padding-top: 4.5rem;
+  }
+
+  .heroSection .hero {
+    flex-direction: column;
+    padding: 2rem 1.25rem;
+    text-align: center;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .heroSection .hero .heroDescription {
+    width: 100%;
+    align-items: center;
+  }
+
+  .heroSection .hero .heroDescription h1 {
+    font-size: 1.7rem;
+    line-height: 1.25;
+  }
+
+  .heroSection .hero .heroDescription p {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  .heroPill {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+  }
+
+  .heroBtns {
+    justify-content: center;
+  }
+
+  .heroButton {
+    padding: 0.65rem 1.4rem;
+    font-size: 0.75rem;
+  }
+
+  .heroSection .imgContainer {
+    width: 100%;
+    height: 70vw;
+    margin-left: 0;
+    border-width: 8px;
+    max-width: 380px;
+    position: relative;
+  }
+
+  /* hide slider arrows */
+  .heroSection .imgContainer button,
+  .heroSection #prev,
+  .heroSection #next,
+  .heroSection .prev,
+  .heroSection .next,
+  .heroSection [id="prev"],
+  .heroSection [id="next"] {
+    display: none !important;
+  }
+
+  .heroSection .hero .wrapper {
+    width: calc(100vw * 8);
+  }
+
+  .heroSection .hero .wrapper img {
+    width: 100vw;
+    height: 70vw;
+  }
+
+
+  /* --- PACKAGES SHORTCUT --- */
+  .pckagesShortcut::scroll-button(right),
+  .pckagesShortcut::scroll-button(left) {
+    display: none;
+  }
+
+  .pckagesShortcut {
+    margin: 1.5rem 1rem;
+    height: auto;
+    gap: 0.75rem;
+  }
+
+  .pckagesShortcut .pckages {
+    flex: 0 0 82vw;
+    height: auto;
+    min-height: 260px;
+  }
+
+  .pckagesShortcut .pckages .pButton button {
+    font-size: 0.9rem;
+  }
+
+  .seeMore {
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .seeMoreBtn {
+    margin-top: 0.5rem;
+  }
+
+
+  /* --- PERFUMES SHORTCUT --- */
+  .pfumesShortcut::scroll-button(right),
+  .pfumesShortcut::scroll-button(left) {
+    display: none;
+  }
+
+  .pfumesShortcut {
+    width: 92vw;
+    height: auto;
+    margin: 1.5rem auto;
+  }
+
+  .pfumesShortcut .pfumes {
+    flex: 0 0 72vw;
+    height: 16rem;
+  }
+
+  .pfumesShortcut .pfumes img {
+    width: 16rem;
+    height: 13rem;
+  }
+
+
+  /* --- SECTION HEADER --- */
+  .sectionHeader {
+    font-size: 1.3rem;
+    padding-top: 2rem;
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+
+  /* --- BOOKING PROCESS STEPS --- */
+  .process {
+    gap: 1rem;
+    margin: 2rem 1rem;
+  }
+
+  .process .steps {
+    width: 42vw;
+    height: auto;
+    min-height: 110px;
+    padding: 1rem;
+    gap: 0.6rem;
+  }
+
+  .process .steps p {
+    font-size: 0.8rem;
+  }
+
+  .process .steps .material-icons {
+    font-size: 28px;
+    padding: 8px;
+  }
+
+
+  /* --- PACKAGE PAGE --- */
+  #packageTitle {
+    padding-top: 5.5rem;
+    font-size: 1.4rem;
+  }
+
+  .package {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+    margin: 1.5rem 1rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 100%;
+    min-width: unset;
+    flex: unset;
+  }
+
+  .pkgStar {
+    font-size: 0.9rem;
+  }
+
+  .pkgRatingText {
+    font-size: 0.78rem;
+  }
+
+  .incl-tab {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.65rem;
+  }
+
+  .incl-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .incl-visual img {
+    width: 100%;
+    height: auto;
+  }
+
+  .perfumeBar {
+    padding: 0 1rem;
+  }
+
+
+  /* --- PERFUME PAGE --- */
+  .perfumeDescription {
+    height: auto;
+    min-height: unset;
+    flex-direction: column;
+    align-items: stretch;
+    position: static;
+    overflow: visible;
+    background-color: transparent !important;
+    margin-top: 0 !important;
+    padding-top: 4rem !important;
+  }
+
+  .perfumeHero {
+    position: relative;
+    width: 100%;
+    height: 85vw;
+    overflow: hidden;
+  }
+
+  .perfumeDescription #perfumeBG {
+    width: 100%;
+    height: 85vw;
+    display: block;
+    object-fit: cover;
+    object-position: center top;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+  }
+
+  .perfumeHero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .perfumeDescription .perfumeImg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .perfumeDescription .perfumeImg img {
+    width: auto;
+    height: 68vw;
+    max-height: 68vw;
+    max-width: 50vw;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.6));
+  }
+
+  .perfumeDescription .details {
+    flex-direction: column;
+    position: relative;
+    height: 55vw;
+    z-index: 1;
+    padding: 1.5rem 1.25rem 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    margin-top: 0;
+  }
+
+  .perfumeDescription .perfumeDetails {
+    width: 100%;
+    padding-left: 0;
+    margin-top: 0;
+  }
+
+  .perfumeDescription .perfumeDetails .inspiredBy {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 0.2rem;
+  }
+
+  .perfumeDescription .perfumeDetails .perfumeName {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
+  }
+
+  .perfumeDescription .perfumeDetails .desc {
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: #555;
+  }
+
+  .perfumeDescription .perfumeDetails .ingredientTitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    padding-top: 0.85rem;
+    padding-bottom: 0.35rem;
+  }
+
+  .perfumeDescription .ratingCount {
+    color: #888;
+  }
+
+  .perfumeDescription .star.empty {
+    color: #ddd;
+  }
+
+  #perfumeTitle {
+    font-size: 1.3rem;
+    padding-top: 2.5rem;
+  }
+
+  .perfumeLists {
+    gap: 1.25rem;
+    padding: 0 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .perfumeLists .perfumeCard {
+    width: 42vw;
+    height: auto;
+    min-height: 50vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .perfumeLists .perfumeCard img {
+    width: 100%;
+    height: 60%;
+    object-fit: contain;
+  }
+
+  .perfumeLists .perfumeTitle {
+    width: 100%;
+    padding: 0.4rem 0.3rem;
+    box-sizing: border-box;
+  }
+
+  .perfumeLists .perfumeTitle p {
+    font-size: 0.7rem;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .ratingCount {
+    font-size: 0.75rem;
+  }
+
+  .star {
+    font-size: 1rem;
+  }
+
+
+  /* --- BOOKING PAGE --- */
+  .bookingContainer {
+    flex-direction: column;
+    padding-top: 5.5rem;
+    align-items: stretch;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    gap: 1.5rem;
+  }
+
+  .bookingContainer .packageBook {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bookingContainer .packageBook label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  .pckgSelected {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pckgSelected h1 {
+    font-size: 1.3rem;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .packageDropdown {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .packageDropdown img {
+    width: 1.4rem;
+    height: 1.4rem;
+    cursor: pointer;
+  }
+
+  .packageList {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    z-index: 100;
+    min-width: 160px;
+    max-width: 80vw;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  .packageList a {
+    display: block;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .packageList a:last-child {
+    border-bottom: none;
+  }
+
+  .packageList a:hover {
+    background: #f9f9f9;
+  }
+
+  .bookingContainer .packageBook .perfContainer {
+    width: 100%;
+    height: auto;
+    max-height: 26rem;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    padding: 0.25rem;
+    box-sizing: border-box;
+  }
+
+  .bookingContainer .packageBook .perfContainer .perfCard {
+    width: 100%;
+    height: auto;
+    min-height: 8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.4rem;
+    box-sizing: border-box;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .bookingContainer .packageBook .perfContainer .perfCard img {
+    width: 70%;
+    height: auto;
+    max-height: 5rem;
+    object-fit: contain;
+  }
+
+  .bookingContainer .packageBook .perfContainer .perfCard p {
+    font-size: 0.68rem;
+    margin-top: 0.3rem;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .timeType {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .timeRange {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+  }
+
+  .timeRange input[type="time"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.82rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  .bookingContainer .packageBook .location #eventAddress,
+  #eventType {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.82rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .aboutSetup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: end;
+  }
+
+  .aboutSetup label {
+    font-size: 0.78rem !important;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .aboutSetup select {
+    width: 100%;
+    padding: 0.5rem 0.4rem;
+    font-size: 0.78rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  .bookingContainer .infos {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .bookingContainer .infos .pics {
+    width: 100%;
+    height: 40vw;
+  }
+
+  .bookingContainer .infos .picCard,
+  .bookingContainer .infos .picCardSetup {
+    width: 100%;
+  }
+
+  .bookingContainer .infos .picCard img {
+    height: 40vw;
+    width: 40vw;
+  }
+
+  .bookingContainer .infos .notes textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 80px;
+  }
+
+  .bookingContainer .infos .submit {
+    width: 100%;
+  }
+
+  .calendar {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+
+  .bookingContainer button {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .day {
+    padding: 8px 4px;
+    font-size: 0.78rem;
+  }
+
+  .popUp .notif {
+    width: 88vw;
+    height: auto;
+    padding: 2rem;
+    gap: 1.5rem;
+  }
+
+  .popUp .notif .icon img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .popUp .notif button {
+    width: 70%;
+    height: 2.5rem;
+  }
+
+  .popUp .uSureBtn button {
+    width: 30vw;
+  }
+
+
+  /* --- PROFILE PAGE --- */
+  .psidebar,
+  .mypsidebar {
+    display: none !important;
+  }
+
+  .profileBG,
+  .myprofileBG {
+    flex-direction: column;
+    padding-top: 4.5rem;
+  }
+
+  .infocontainer {
+    padding: 1.25rem 1rem 2rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .infocontainer h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .infocon {
+    width: 100%;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    border-radius: 14px;
+  }
+
+  .prow {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .pcolumn {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .pcolumn input {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 0.9rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .edit {
+    width: 100%;
+    height: 2.8rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+  }
+
+  .profBtn,
+  .editProf {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: stretch;
+  }
+
+
+  /* --- MY BOOKINGS --- */
+  .mybookingscontainer {
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem 1rem 2rem;
+    box-sizing: border-box;
+    padding-top: 0;
+  }
+
+  .mybookingscontainer h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    padding-top: 0;
+  }
+
+  .statusFilterRow {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .statusFilterRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .statusFilterCard {
+    flex: 0 0 auto;
+    min-width: 80px;
+    padding: 10px 12px 8px;
+  }
+
+  .statusFilterCard .cardCount {
+    font-size: 22px;
+  }
+
+  .myinfocon {
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 14px;
+  }
+
+  .mybookingconfirmation {
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .myprow {
+    flex-direction: column;
+    gap: 0.2rem;
+    justify-content: flex-start;
+  }
+
+  .profileButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .profileButtons .bookButton {
+    width: 100%;
+    height: 2.6rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .prow.booking-action-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .bookingDetails {
+    width: 96vw;
+    max-height: 70vh;
+    border-radius: 16px;
+  }
+
+  .bookingInfoGrid,
+  .generalInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .bookingInfoGrid .infos:nth-child(4) {
+    grid-column: 1;
+  }
+
+  .customerSection h3 {
+    font-size: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.3rem;
+  }
+
+  .paymentBox {
+    width: 96vw;
+    max-height: 92vh;
+    border-radius: 14px;
+  }
+
+  .paymentBody {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .paymentLeft {
+    border-right: none;
+    border-bottom: 1px solid #ebebeb;
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+
+  .cancelReasonBox {
+    width: 92vw;
+    padding: 20px;
+  }
+
+  .ratingBox {
+    width: 92vw;
+    padding: 20px 16px;
+  }
+
+
+  /* --- LOGIN & SIGNUP --- */
+  .loginsignupBG {
+    background-attachment: scroll;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 100vh;
+  }
+
+  /* fixed top bar with logo and back link */
+  .loginsignuplogo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+    z-index: 9999;
+  }
+
+  .loginsignuplogo img {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .loginsignuplogo a {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+  }
+
+  .loginsignuplogo a:hover {
+    color: #fff;
+  }
+
+  /* hide desktop tagline panel */
+  .loginsignupheader {
+    display: none;
+  }
+
+  /* white card that sits at the bottom over the background image */
+  .loginsignup {
+    width: 100%;
+    min-height: auto;
+    margin-left: 0;
+    margin-top: 0;
+    border-radius: 24px 24px 0 0;
+    padding: 1.5rem 1.5rem 2.5rem;
+    box-sizing: border-box;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+  }
+
+  /* drag handle pill */
+  .loginsignup::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 0 auto 1rem;
+  }
+
+  .loginsignup h1 {
+    font-size: 1.5rem;
+    padding-bottom: 0.15rem;
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .username,
+  .password,
+  .confirmpassword {
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-size: 0.92rem;
+    height: auto;
+  }
+
+  .loginsignup label,
+  .loginsignup .formlabel {
+    font-size: 0.70rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  .loginsignupbtn {
+    width: 100%;
+    height: 2.8rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+  }
+
+  /* form flex column so gosignup stays below button */
+  .loginsignup form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .gosignup {
+    margin-top: 0.85rem;
+    padding-top: 0;
+    height: auto;
+    text-align: center;
+  }
+
+  .gosignup p,
+  .loginsignup p {
+    font-size: 0.82rem;
+  }
+
+  .loginErrorBanner {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+  }
+
+
+  /* --- ABOUT PAGE --- */
+  .aboutHero {
+    padding: 6rem 1.25rem 3rem;
+    min-height: 40vh;
+  }
+
+  .aboutHero h1 {
+    font-size: 1.8rem;
+  }
+
+  .aboutSection,
+  .galleryInner,
+  .aboutSectionFull {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .galleryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .galleryItem {
+    height: 130px;
+  }
+
+
+  /* --- REVIEWS --- */
+  .reviewsSummary {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .reviewsRight {
+    max-width: 100%;
+  }
+
+  .avgNumber {
+    font-size: 2.8rem;
+  }
+
+  .customerReviews {
+    padding: 2rem 1.25rem;
+  }
+
+
+  /* --- FOOTER --- */
+  Footer .platforms {
+    gap: 1rem;
+    padding-top: 1.5rem;
+  }
+
+  Footer .platforms .icons {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  Footer .footNavs ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  Footer .copyRight {
+    font-size: 0.8rem;
+  }
+
+}
+
+
+/* ============================================================
+   LARGER MOBILE - 441px to 768px
+   ============================================================ */
+@media (max-width: 768px) and (min-width: 441px) {
+
+  /* --- HEADER --- */
+  Header {
+    height: auto;
+    padding: 0.9rem 1.5rem;
+  }
+
+  Header .logo img {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  Header .navs,
+  Header .loginOrSignup,
+  Header .userProfile,
+  header .userProfile {
+    display: none !important;
+  }
+
+  Header .burger {
+    display: flex;
+    padding-right: 0;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  Header .burger .material-icons {
+    font-size: 2rem;
+    color: var(--dark);
+  }
+
+
+  /* --- MOBILE NAV DRAWER --- */
+  .mobileNavDrawer {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 65vw;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--dark);
+    z-index: 99999;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .mobileNavDrawer.open {
+    left: 0;
+  }
+
+  .mobileNavDrawer .drawerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .mobileNavDrawer .drawerHeader img.drawerLogo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .mobileNavDrawer .drawerClose {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .mobileNavDrawer .drawerUserProfile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .mobileNavDrawer .drawerUserProfile img {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .mobileNavDrawer .drawerUserProfile span {
+    color: var(--white);
+    font-size: 0.9rem;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .loginButton,
+  .mobileNavDrawer .drawerAuthBtns .signupButton {
+    width: 100%;
+    height: 2.6rem;
+    border-radius: 999px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .loginButton {
+    background-color: transparent;
+    color: var(--white);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .mobileNavDrawer .drawerAuthBtns .signupButton {
+    background-color: var(--gold);
+    color: var(--white);
+  }
+
+  .mobileNavDrawer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobileNavDrawer ul li a {
+    display: block;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    transition: color 0.2s, padding-left 0.2s;
+  }
+
+  .mobileNavDrawer ul li a:hover {
+    color: var(--gold);
+    padding-left: 0.75rem;
+  }
+
+  .mobileNavOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobileNavOverlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+
+  /* --- PROFILE PAGE DRAWER --- */
+  .profileBurger {
+    display: flex;
+    position: fixed;
+    top: 1rem;
+    right: 1.5rem;
+    z-index: 9000;
+    background: var(--dark);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 1.5rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .profileNavOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .profileNavOverlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .profileNavDrawer {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 65vw;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--dark);
+    z-index: 99999;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    box-sizing: border-box;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .profileNavDrawer.open {
+    left: 0;
+  }
+
+  .profileDrawerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .profileDrawerLogo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .profileDrawerClose {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .profileDrawerUser {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+  }
+
+  .profileDrawerUser img {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+  }
+
+  .profileDrawerUser span {
+    color: var(--white);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .profileNavDrawer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .profileNavDrawer ul li a {
+    display: block;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    padding: 1rem 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    transition: color 0.2s, padding-left 0.2s;
+    cursor: pointer;
+  }
+
+  .profileNavDrawer ul li a:hover {
+    color: var(--gold);
+    padding-left: 0.75rem;
+  }
+
+
+  /* --- HERO SECTION --- */
+  /* hide slider arrows */
+  .heroSection .imgContainer button,
+  .heroSection #prev,
+  .heroSection #next,
+  .heroSection .prev,
+  .heroSection .next {
+    display: none !important;
+  }
+
+  .seeMore {
+    margin-top: 1.5rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .heroSection .hero {
+    flex-direction: column;
+    padding: 3rem 2rem;
+    text-align: center;
+    align-items: center;
+  }
+
+  .heroSection .hero .heroDescription {
+    width: 100%;
+    align-items: center;
+  }
+
+  .heroSection .imgContainer {
+    width: 80%;
+    max-width: 380px;
+    height: 60vw;
+    margin-left: 0;
+  }
+
+
+  /* --- PACKAGES & PERFUMES SHORTCUT --- */
+  .pckagesShortcut {
+    margin: 2rem 1.5rem;
+  }
+
+  .pckagesShortcut .pckages {
+    flex: 0 0 70vw;
+  }
+
+  .pfumesShortcut {
+    width: 90vw;
+  }
+
+  .pfumesShortcut .pfumes {
+    flex: 0 0 60vw;
+  }
+
+
+  /* --- PERFUME PAGE --- */
+  .perfumeDescription {
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .perfumeDescription #perfumeBG {
+    width: 50%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    object-fit: cover;
+  }
+
+  .perfumeDescription .details {
+    flex-direction: row;
+    padding: 2.5rem 1.5rem;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    align-items: center;
+  }
+
+  .perfumeDescription .perfumeDetails {
+    width: 55%;
+  }
+
+  .perfumeDescription .perfumeImg {
+    display: flex;
+    width: 40%;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .perfumeDescription .perfumeImg img {
+    width: auto;
+    height: 68vw;
+    max-height: 68vw;
+    max-width: 50vw;
+    object-fit: contain;
+  }
+
+  .perfumeLists .perfumeCard {
+    width: 38vw;
+    height: auto;
+    min-height: 44vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .perfumeLists .perfumeCard img {
+    width: 100%;
+    height: 70%;
+    object-fit: contain;
+  }
+
+  .perfumeLists .perfumeTitle {
+    width: 100%;
+    padding: 0.4rem 0.3rem;
+    box-sizing: border-box;
+  }
+
+  .perfumeLists .perfumeTitle p {
+    font-size: 0.8rem;
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+
+  /* --- BOOKING PAGE --- */
+  .bookingContainer .packageBook .perfContainer {
+    width: 100%;
+    height: auto;
+    max-height: 28rem;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    box-sizing: border-box;
+  }
+
+  .bookingContainer .packageBook .perfContainer .perfCard {
+    width: 100%;
+    height: auto;
+    min-height: 9rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .bookingContainer .packageBook .perfContainer .perfCard p {
+    font-size: 0.75rem;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .aboutSetup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .aboutSetup select {
+    width: 100%;
+  }
+
+  .packageList {
+    position: absolute;
+    top: 2rem;
+    left: 10rem;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    z-index: 100;
+    min-width: 160px;
+    max-width: 80vw;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  .packageList a {
+    display: block;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .packageList a:last-child {
+    border-bottom: none;
+  }
+
+
+  /* --- PROFILE PAGE --- */
+  .psidebar,
+  .mypsidebar {
+    display: none !important;
+  }
+
+  .profileBG,
+  .myprofileBG {
+    flex-direction: column;
+    padding-top: 4.5rem;
+  }
+
+  .infocontainer {
+    padding: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .infocontainer h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .infocon {
+    width: 100%;
+    padding: 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .prow {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .pcolumn {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .pcolumn input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.9rem 0.75rem;
+  }
+
+  .edit {
+    width: 100%;
+    height: 2.8rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+  }
+
+  .profBtn,
+  .editProf {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: stretch;
+  }
+
+
+  /* --- MY BOOKINGS --- */
+  .mybookingscontainer {
+    margin-left: 0;
+    width: 100%;
+    padding: 4.5rem 1.25rem 2rem;
+    box-sizing: border-box;
+  }
+
+  .mybookingscontainer h1 {
+    font-size: 2rem;
+    padding-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .statusFilterRow {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+
+  .statusFilterRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .statusFilterCard {
+    flex: 0 0 auto;
+    min-width: 90px;
+  }
+
+  .myinfocon {
+    width: 100%;
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  .mybookingconfirmation {
+    width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .myprow {
+    flex-direction: column;
+    gap: 0.2rem;
+    justify-content: flex-start;
+  }
+
+  .profileButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .profileButtons .bookButton {
+    width: 100%;
+    height: 2.6rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .bookingDetails {
+    width: 96vw;
+    max-height: 92vh;
+  }
+
+  .bookingInfoGrid,
+  .generalInfoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentBox {
+    width: 96vw;
+    max-height: 92vh;
+  }
+
+  .paymentBody {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .paymentLeft {
+    border-right: none;
+    border-bottom: 1px solid #ebebeb;
+    padding-right: 0;
+    padding-bottom: 1rem;
+  }
+
+  .cancelReasonBox {
+    width: 92vw;
+  }
+
+  .ratingBox {
+    width: 92vw;
+  }
+
 }

@@ -3,6 +3,21 @@
 session_start();
 require("db.php");
 
+// ======================secure======================
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$adminUsername = 'Admin';
+if (isset($_SESSION['admin_id'])) {
+    $adminId = (int) $_SESSION['admin_id'];
+    $adminResult = mysqli_query($conn, "SELECT Username FROM Admin_Information WHERE Admin_ID_PK = $adminId");
+    if ($adminRow = mysqli_fetch_assoc($adminResult)) {
+        $adminUsername = $adminRow['Username'];
+    }
+}
+
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
@@ -14,16 +29,17 @@ mysqli_query($conn, "ALTER TABLE Booking_Payment MODIFY COLUMN Gcash_Number VARC
 mysqli_query($conn, "ALTER TABLE Booking_Payment MODIFY COLUMN Gcash_Name VARCHAR(50) NOT NULL DEFAULT ''");
 mysqli_query($conn, "ALTER TABLE Booking_Payment MODIFY COLUMN Refund_Receipt VARCHAR(250) NOT NULL DEFAULT ''");
 mysqli_query($conn, "ALTER TABLE Booking MODIFY COLUMN Booking_Status ENUM('Pending','To Pay','Approved','Completed','To Refund','Cancelled') NOT NULL DEFAULT 'Pending'");
+mysqli_query($conn, "ALTER TABLE Booking_Payment ADD COLUMN IF NOT EXISTS Resubmit_Requested TINYINT(1) NOT NULL DEFAULT 0");
 
 /* Fix legacy rows that used old label-style ENUM values */
 mysqli_query($conn, "UPDATE Booking SET Booking_Status = 'Approved'  WHERE Booking_Status = 'Confirmed'");
 
 /* ── HANDLE: Accept (Pending → To Pay) ───────────────────────── */
 if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['action_accept'])) {
-    $id        = (int) $_POST['booking_id'];
+    $id = (int) $_POST['booking_id'];
     $gcashName = mysqli_real_escape_string($conn, trim($_POST['gcash_name'] ?? ''));
-    $gcashNum  = mysqli_real_escape_string($conn, preg_replace('/[^0-9]/', '', trim($_POST['gcash_number'] ?? '')));
-    $addFee    = (float) ($_POST['additional_fee'] ?? 0);
+    $gcashNum = mysqli_real_escape_string($conn, preg_replace('/[^0-9]/', '', trim($_POST['gcash_number'] ?? '')));
+    $addFee = (float) ($_POST['additional_fee'] ?? 0);
     $addReason = mysqli_real_escape_string($conn, trim($_POST['additional_fee_reason'] ?? ''));
 
     /* Fetch package price */
@@ -33,23 +49,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['action_acce
          INNER JOIN Packages p ON b.Package_ID_FK = p.Package_ID_PK
          WHERE b.Booking_ID_PK = $id"
     );
-    $pkg   = mysqli_fetch_assoc($pkgResult);
-    $total = $pkg ? ((float)$pkg['Price'] + $addFee) : $addFee;
+    $pkg = mysqli_fetch_assoc($pkgResult);
+    $total = $pkg ? ((float) $pkg['Price'] + $addFee) : $addFee;
 
     /* Handle QR Code Upload */
     $gcashCode = '';
-    $uploadOk  = false;
+    $uploadOk = false;
     if (isset($_FILES['gcash_qr']) && $_FILES['gcash_qr']['error'] === UPLOAD_ERR_OK) {
         $targetDir = "uploads/gcash_qr/";
-        if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-        $fileExt      = strtolower(pathinfo($_FILES['gcash_qr']['name'], PATHINFO_EXTENSION));
-        $newFilename  = "qr_" . $id . "_" . time() . "." . $fileExt;
-        $targetFile   = $targetDir . $newFilename;
+        if (!is_dir($targetDir))
+            mkdir($targetDir, 0777, true);
+        $fileExt = strtolower(pathinfo($_FILES['gcash_qr']['name'], PATHINFO_EXTENSION));
+        $newFilename = "qr_" . $id . "_" . time() . "." . $fileExt;
+        $targetFile = $targetDir . $newFilename;
         $allowedTypes = ['jpg', 'jpeg', 'png', 'webp'];
         if (in_array($fileExt, $allowedTypes) && $_FILES['gcash_qr']['size'] < 5000000) {
             if (move_uploaded_file($_FILES['gcash_qr']['tmp_name'], $targetFile)) {
                 $gcashCode = $newFilename;
-                $uploadOk  = true;
+                $uploadOk = true;
             }
         }
     }
@@ -90,6 +107,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['action_acce
                 ($id, $addFee, '$addReason', '$gcashNum', '$gcashName', '$gcashCodeEsc', $total)"
         );
     }
+    
+
 
     /* Only flip status when DB write succeeded */
     if ($payOk) {
@@ -103,9 +122,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['action_acce
     exit;
 }
 
+/* ── HANDLE: Request Receipt Resubmit ── */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_request_resubmit'])) {
+    $id = (int) $_POST['booking_id'];
+    mysqli_query($conn, "UPDATE Booking_Payment SET Resubmit_Requested = 1, Customer_Receipt = '' WHERE Booking_ID_FK = $id");
+    header("Location: bookingconfirmation.php");
+    exit;
+}
 /* ── HANDLE: Decline with note (Pending → Cancelled) ─────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_decline'])) {
-    $id          = (int) $_POST['booking_id'];
+    $id = (int) $_POST['booking_id'];
     $declineNote = mysqli_real_escape_string($conn, trim($_POST['decline_note'] ?? ''));
 
     if ($declineNote !== '') {
@@ -144,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_complete'])) {
         $conn,
         "SELECT Event_Date FROM Booking WHERE Booking_ID_PK = $id"
     ));
-    $today     = new DateTime(date('Y-m-d'));
+    $today = new DateTime(date('Y-m-d'));
     $eventDate = new DateTime($evt['Event_Date']);
     if ($today >= $eventDate) {
         mysqli_query($conn, "UPDATE Booking SET Booking_Status = 'Completed' WHERE Booking_ID_PK = $id");
@@ -155,8 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_complete'])) {
 
 /* ── HANDLE: Cancel with note (Approved → To Refund) ─────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_cancel'])) {
-    $id          = (int) $_POST['booking_id'];
-    $cancelNote  = mysqli_real_escape_string($conn, trim($_POST['cancel_note'] ?? ''));
+    $id = (int) $_POST['booking_id'];
+    $cancelNote = mysqli_real_escape_string($conn, trim($_POST['cancel_note'] ?? ''));
 
     if ($cancelNote !== '') {
         mysqli_query($conn, "UPDATE Booking SET Booking_Status = 'To Refund' WHERE Booking_ID_PK = $id");
@@ -175,14 +201,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_cancel'])) {
 
 /* ── HANDLE: Upload Refund Receipt (To Refund → Cancelled) ──────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_refund_receipt'])) {
-    $id         = (int) $_POST['booking_id'];
+    $id = (int) $_POST['booking_id'];
     $refundFile = "";
     if (isset($_FILES['refund_receipt']) && $_FILES['refund_receipt']['error'] === 0) {
         $targetDir = "uploads/refund_receipts/";
-        if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-        $fileExt     = strtolower(pathinfo($_FILES['refund_receipt']['name'], PATHINFO_EXTENSION));
+        if (!is_dir($targetDir))
+            mkdir($targetDir, 0777, true);
+        $fileExt = strtolower(pathinfo($_FILES['refund_receipt']['name'], PATHINFO_EXTENSION));
         $newFilename = "refund_" . $id . "_" . time() . "." . $fileExt;
-        $targetFile  = $targetDir . $newFilename;
+        $targetFile = $targetDir . $newFilename;
         $allowedTypes = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
         if (in_array($fileExt, $allowedTypes) && $_FILES['refund_receipt']['size'] < 5000000) {
             if (move_uploaded_file($_FILES['refund_receipt']['tmp_name'], $targetFile)) {
@@ -206,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_refund_receipt
 
 /* ── HANDLE: Delete Cancelled Booking ───────────────────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_delete'])) {
-    $id    = (int) $_POST['booking_id'];
+    $id = (int) $_POST['booking_id'];
     $check = mysqli_fetch_assoc(mysqli_query(
         $conn,
         "SELECT Booking_Status FROM Booking WHERE Booking_ID_PK = $id"
@@ -241,12 +268,14 @@ $bookings = mysqli_query(
         p.Package_Name,
         p.Price AS Package_Price,
         bs.Bar_Name,
-        bv.Bottle_Var_Name
+        bv.Bottle_Var_Name,
+        sm.Mirror_Name
     FROM Booking b
     INNER JOIN User_Information u  ON b.User_ID_FK       = u.User_ID_PK
     INNER JOIN Packages p          ON b.Package_ID_FK    = p.Package_ID_PK
     INNER JOIN Bar_Setup bs        ON b.Bar_Setup_ID_FK  = bs.Bar_Setup_ID_PK
     INNER JOIN Bottle_Variants bv  ON b.Bottle_Var_ID_FK = bv.Bottle_Var_ID_PK
+    INNER JOIN Selfie_Mirror sm    ON b.Selfie_Mirror_ID_FK = sm.Selfie_Mirror_ID_PK
     ORDER BY b.Booking_ID_PK DESC"
 );
 
@@ -268,7 +297,8 @@ function getCount($counts, $key)
 $paymentQuery = mysqli_query(
     $conn,
     "SELECT Booking_ID_FK, Additional_Fee, Additional_Fee_Description,
-            Gcash_Number, Gcash_Name, Gcash_Code, Customer_Receipt, Refund_Receipt, Total_Price
+            Gcash_Number, Gcash_Name, Gcash_Code, Customer_Receipt,
+            Refund_Receipt, Total_Price, Resubmit_Requested
      FROM Booking_Payment"
 );
 $paymentData = [];
@@ -287,8 +317,10 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
 }
 ?>
 <?php if (isset($_GET['db_err']) && $_GET['db_err']): ?>
-    <div style="background:#c0392b;color:#fff;padding:12px 20px;font-family:sans-serif;font-size:13px;position:fixed;top:0;left:0;right:0;z-index:99999;">
-        <strong>DB Error:</strong> <?= htmlspecialchars($_GET['db_err']); ?> — Please run: <code>ALTER TABLE Booking_Payment MODIFY COLUMN Gcash_Number VARCHAR(15) NOT NULL DEFAULT '';</code>
+    <div
+        style="background:#c0392b;color:#fff;padding:12px 20px;font-family:sans-serif;font-size:13px;position:fixed;top:0;left:0;right:0;z-index:99999;">
+        <strong>DB Error:</strong> <?= htmlspecialchars($_GET['db_err']); ?> — Please run:
+        <code>ALTER TABLE Booking_Payment MODIFY COLUMN Gcash_Number VARCHAR(15) NOT NULL DEFAULT '';</code>
     </div>
 <?php endif; ?>
 <!DOCTYPE html>
@@ -300,28 +332,47 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
     <title>Jilz | Admin – Bookings</title>
     <link rel="shortcut icon" href="assets/Logo_Tentative.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="mobileStyle.css">
+    <link rel="stylesheet" href="admin.css?v=4">
+    <link rel="stylesheet" href="adminMobile.css">
 
 </head>
 
 <body class="adminBG">
 
+    <!-- BURGER OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MOBILE TOP BAR -->
+    <div class="mobile-topbar">
+        <div class="mobile-topbar-brand">
+            <img src="assets/Logo_Tentative.png" alt="Jilz Logo">
+            <span>Admin</span>
+        </div>
+        <button class="burger-btn" id="burgerBtn" aria-label="Open menu" aria-expanded="false">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
+    </div>
+
     <!-- ── SIDEBAR ── -->
-    <div class="asidebar">
-        <h1>Admin</h1>
+    <div class="asidebar" id="adminSidebar">
+        <h1 style="margin-bottom:8vw;">Admin</h1>
         <div class="roww">
-            <img src="assets/Logo_Tentative.png" class="adminpic">
+
             <div id="adminnameemail">
-                <h3>Username</h3>
-                <p>Email</p>
+                <h3>
+                    <?= htmlspecialchars($adminUsername); ?>
+                </h3>
             </div>
         </div>
         <hr>
         <ul>
             <li><a href="bookingconfirmation.php">Manage Bookings</a></li>
+            <li><a href="eventCalendar.php">Event Calendar</a></li>
             <li><a href="manageProducts.php">Manage Offerings</a></li>
             <li><a href="manageGallery.php">Manage Gallery</a></li>
+            <li><a href="ratingsfilter.php">Manage Reviews</a></li>
             <li><a href="addAdmin.php">Add Admin</a></li>
             <li><a href="#" onclick="openLogoutModal()">Logout</a></li>
         </ul>
@@ -358,7 +409,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                 <div class="cardCount" style="color:#ec4899;"><?= getCount($counts, 'To Refund'); ?></div>
             </div>
             <div class="statusCard" data-filter="Cancelled" style="border-top: 3px solid #ef4444;">
-                <div class="cardLabel"><span class="cardDot" style="background:#ef4444;"></span>CANCELLED</div>
+                <div class="cardLabel"><span class="cardDot" style="background:#ef4444;"></span>Declined</div>
                 <div class="cardCount" style="color:#ef4444;"><?= getCount($counts, 'Cancelled'); ?></div>
             </div>
         </div>
@@ -391,17 +442,18 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                          WHERE bp.Booking_ID_FK = " . $row['Booking_ID_PK']
                         );
                         $pnames = [];
-                        while ($p = mysqli_fetch_assoc($pq)) $pnames[] = $p['Inspired_Scent'];
+                        while ($p = mysqli_fetch_assoc($pq))
+                            $pnames[] = $p['Inspired_Scent'];
                         $perfumesSelected = implode(', ', $pnames);
 
-                        $pay        = $paymentData[$row['Booking_ID_PK']]   ?? [];
+                        $pay = $paymentData[$row['Booking_ID_PK']] ?? [];
                         $cancelInfo = $cancelledNotes[$row['Booking_ID_PK']] ?? [];
 
                         /* Badge class map */
                         $badgeMap = [
-                            'Pending'   => 'sPending',
-                            'To Pay'    => 'sToPay',
-                            'Approved'  => 'sApproved',
+                            'Pending' => 'sPending',
+                            'To Pay' => 'sToPay',
+                            'Approved' => 'sApproved',
                             'Cancelled' => 'sCancelled',
                             'Completed' => 'sCompleted',
                             'To Refund' => 'sToRefund',
@@ -409,29 +461,30 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
 
                         /* Display label map */
                         $displayStatus = [
-                            'Pending'   => 'Pending',
-                            'To Pay'    => 'To Pay',
-                            'Approved'  => 'Confirmed',
+                            'Pending' => 'Pending',
+                            'To Pay' => 'To Pay',
+                            'Approved' => 'Confirmed',
                             'Cancelled' => 'Cancelled',
                             'Completed' => 'Completed',
                             'To Refund' => 'To Refund',
                         ];
 
-                        $badgeClass  = $badgeMap[$row['Booking_Status']] ?? '';
+                        $badgeClass = $badgeMap[$row['Booking_Status']] ?? '';
                         $statusLabel = $displayStatus[$row['Booking_Status']] ?? $row['Booking_Status'];
-                    ?>
+                        ?>
                         <tr data-row-status="<?= htmlspecialchars($row['Booking_Status']); ?>">
-                            <td><?= $row['Booking_ID_PK']; ?></td>
-                            <td><?= htmlspecialchars($row['Username']); ?></td>
-                            <td><?= htmlspecialchars($row['Event_Address']); ?></td>
-                            <td><?= date('h:i A', strtotime($row['Event_Time_Start'])); ?> – <?= date('h:i A', strtotime($row['Event_Time_End'])); ?></td>
-                            <td><?= date('M d, Y', strtotime($row['Event_Date'])); ?></td>
-                            <td><?= htmlspecialchars($row['Package_Name']); ?></td>
-                            <td><?= date('M d, Y h:i A', strtotime($row['Created_At'])); ?></td>
-                            <td><span class="tblStatusBadge <?= $badgeClass; ?>"><?= $statusLabel; ?></span></td>
+                            <td data-label="ID"><?= $row['Booking_ID_PK']; ?></td>
+                            <td data-label="Username"><?= htmlspecialchars($row['Username']); ?></td>
+                            <td data-label="Address"><?= htmlspecialchars($row['Event_Address']); ?></td>
+                            <td data-label="Time"><?= date('h:i A', strtotime($row['Event_Time_Start'])); ?> –
+                                <?= date('h:i A', strtotime($row['Event_Time_End'])); ?></td>
+                            <td data-label="Date"><?= date('M d, Y', strtotime($row['Event_Date'])); ?></td>
+                            <td data-label="Package"><?= htmlspecialchars($row['Package_Name']); ?></td>
+                            <td data-label="Date Issued"><?= date('M d, Y h:i A', strtotime($row['Created_At'])); ?></td>
+                            <td data-label="Status"><span
+                                    class="tblStatusBadge <?= $badgeClass; ?>"><?= $statusLabel; ?></span></td>
                             <td>
-                                <button class="viewBtn"
-                                    data-id="<?= $row['Booking_ID_PK']; ?>"
+                                <button class="viewBtn" data-id="<?= $row['Booking_ID_PK']; ?>"
                                     data-customername="<?= htmlspecialchars($row['Full_Name']); ?>"
                                     data-phone="<?= htmlspecialchars($row['Phone_No']); ?>"
                                     data-email="<?= htmlspecialchars($row['Email']); ?>"
@@ -445,6 +498,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                                     data-notes="<?= htmlspecialchars($row['Event_Notes']); ?>"
                                     data-barsetup="<?= htmlspecialchars($row['Bar_Name']); ?>"
                                     data-bottle="<?= htmlspecialchars($row['Bottle_Var_Name']); ?>"
+                                    data-mirror="<?= htmlspecialchars($row['Mirror_Name'] ?? ''); ?>"
                                     data-perfumes="<?= htmlspecialchars($perfumesSelected); ?>"
                                     data-status="<?= htmlspecialchars($row['Booking_Status']); ?>"
                                     data-gcash="<?= htmlspecialchars($pay['Gcash_Number'] ?? ''); ?>"
@@ -455,7 +509,8 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                                     data-total="<?= $pay['Total_Price'] ?? $row['Package_Price']; ?>"
                                     data-receipt="<?= htmlspecialchars($pay['Customer_Receipt'] ?? ''); ?>"
                                     data-refundreceipt="<?= htmlspecialchars($pay['Refund_Receipt'] ?? ''); ?>"
-                                    data-cancelnote="<?= htmlspecialchars($cancelInfo['Note'] ?? ''); ?>">
+                                    data-cancelnote="<?= htmlspecialchars($cancelInfo['Note'] ?? ''); ?>"
+                                    data-resubmit="<?= $pay['Resubmit_Requested'] ?? '0'; ?>">
                                     View
                                 </button>
                             </td>
@@ -530,6 +585,10 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                         <p class="val" id="dBottle"></p>
                     </div>
                     <div class="infoItem">
+                        <p class="lbl">Selfie Mirror</p>
+                        <p class="val" id="dMirror"></p>
+                    </div>
+                    <div class="infoItem">
                         <p class="lbl">Status</p>
                         <p class="val" id="dStatus"></p>
                     </div>
@@ -575,6 +634,18 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
             </div>
         </div>
     </div>
+    
+    <!-- Mini Confirm Modal — Request Resubmit -->
+<div class="miniModal" id="miniResubmit">
+    <div class="miniModalBox">
+        <h3>Request Resubmit</h3>
+        <p>Ask the customer to reupload their receipt? The current receipt will be cleared.</p>
+        <div class="miniModalBtns">
+            <button class="btnConfirm" onclick="document.getElementById('formResubmit').submit()">Confirm</button>
+            <button class="btnCancel" onclick="closeMini('miniResubmit')">Cancel</button>
+        </div>
+    </div>
+</div>
 
     <!-- Mini Confirm Modal — Mark as Completed -->
     <div class="miniModal" id="miniComplete">
@@ -594,14 +665,20 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
             <h3>Delete Booking</h3>
             <p>Permanently delete this cancelled booking? This cannot be undone.</p>
             <div class="miniModalBtns">
-                <button class="btnConfirm" style="background:#c0392b;" onclick="document.getElementById('formDelete').submit()">Delete</button>
+                <button class="btnConfirm" style="background:#c0392b;"
+                    onclick="document.getElementById('formDelete').submit()">Delete</button>
                 <button class="btnCancel" onclick="closeMini('miniDelete')">Cancel</button>
             </div>
         </div>
     </div>
+    
+    <!-- Hidden Resubmit Form (static) -->
+<form id="formResubmit" method="POST" action="bookingconfirmation.php" style="display:none;">
+    <input type="hidden" name="booking_id" id="resubmitBookingId" value="">
+    <input type="hidden" name="action_request_resubmit" value="1">
+</form>
 
     <!-- Logout Modal -->
-    <!-- LOGOUT MODAL (uses admin.css classes — intentional) -->
     <div id="logoutModal" class="modal-overlay del-modal" style="display:none;">
         <div class="modal-box">
             <h3>Confirm Logout</h3>
@@ -638,7 +715,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
             document.getElementById('detailModal').classList.remove('open');
         }
 
-        document.getElementById('detailModal').addEventListener('click', function(e) {
+        document.getElementById('detailModal').addEventListener('click', function (e) {
             if (e.target === this) closeDetailModal();
         });
 
@@ -785,7 +862,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                     const wrap = document.getElementById('qrPreviewWrap');
                     const img = document.getElementById('qrPreviewImg');
                     if (inp) {
-                        inp.addEventListener('change', function() {
+                        inp.addEventListener('change', function () {
                             const file = this.files[0];
                             if (file) {
                                 const reader = new FileReader();
@@ -801,55 +878,66 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
             }
 
             /* ── TO PAY: Show payment details and allow confirming payment ── */
-            else if (d.status === 'To Pay') {
-                const totalFmt = parseFloat(d.total).toLocaleString('en-PH', {
-                    style: 'currency',
-                    currency: 'PHP'
-                });
-                const receiptHtml = hasReceipt ?
-                    `<img class="receiptImg" src="uploads/receipts/${esc(d.receipt)}" alt="Customer receipt">` :
-                    `<p class="noReceipt">Waiting for customer to upload receipt.</p>`;
+else if (d.status === 'To Pay') {
+    const totalFmt = parseFloat(d.total).toLocaleString('en-PH', {
+        style: 'currency',
+        currency: 'PHP'
+    });
+    const receiptHtml = hasReceipt ?
+        `<img class="receiptImg" src="uploads/receipts/${esc(d.receipt)}" alt="Customer receipt">` :
+        `<p class="noReceipt">Waiting for customer to upload receipt.</p>`;
 
-                area.innerHTML = `
-                    <p class="actionTitle">Payment Details</p>
-                    <div class="actionForm">
-                        <div class="fRow">
-                            <div>
-                                <label>GCash Number (sent to customer)</label>
-                                <input type="text" value="${esc(d.gcash)}" readonly>
-                            </div>
-                            <div>
-                                <label>Total Amount</label>
-                                <input type="text" value="${totalFmt}" readonly>
-                            </div>
-                        </div>
-                        <div class="fRow">
-                            <div>
-                                <label>Additional Fee</label>
-                                <input type="text" value="PHP ${parseFloat(d.addFee || 0).toFixed(2)}" readonly>
-                            </div>
-                            <div>
-                                <label>Fee Description</label>
-                                <input type="text" value="${esc(d.addReason) || '—'}" readonly>
-                            </div>
-                        </div>
-                        <div>
-                            <label>Customer Receipt</label>
-                            <div>${receiptHtml}</div>
-                        </div>
-                        ${!hasReceipt ? `<div class="warningNote">Cannot confirm payment — customer has not yet uploaded their receipt.</div>` : ''}
-                        <div class="actionBtns">
-                            <button type="button" class="btn-confirm"
-                                ${hasReceipt ? `onclick="openMini('miniConfirmPay')"` : 'disabled'}>
-                                Confirm Payment
-                            </button>
-                        </div>
-                    </div>
-                    <form id="formConfirmPay" method="POST" action="bookingconfirmation.php" style="display:none;">
-                        <input type="hidden" name="booking_id" value="${d.id}">
-                        <input type="hidden" name="action_confirm_payment" value="1">
-                    </form>`;
-            }
+    area.innerHTML = `
+        <p class="actionTitle">Payment Details</p>
+        <div class="actionForm">
+            <div class="fRow">
+                <div>
+                    <label>GCash Number (sent to customer)</label>
+                    <input type="text" value="${esc(d.gcash)}" readonly>
+                </div>
+                <div>
+                    <label>Total Amount</label>
+                    <input type="text" value="${totalFmt}" readonly>
+                </div>
+            </div>
+            <div class="fRow">
+                <div>
+                    <label>Additional Fee</label>
+                    <input type="text" value="PHP ${parseFloat(d.addFee || 0).toFixed(2)}" readonly>
+                </div>
+                <div>
+                    <label>Fee Description</label>
+                    <input type="text" value="${esc(d.addReason) || '—'}" readonly>
+                </div>
+            </div>
+            <div>
+                <label>Customer Receipt</label>
+                <div>${receiptHtml}</div>
+            </div>
+            ${!hasReceipt ? `<div class="warningNote">Cannot confirm payment — customer has not yet uploaded their receipt.</div>` : ''}
+            <div class="actionBtns">
+                <button type="button" class="btn-confirm"
+                    ${hasReceipt ? `onclick="openMini('miniConfirmPay')"` : 'disabled'}>
+                    Confirm Payment
+                </button>
+            </div>
+
+            <div style="margin-top:16px; border-top:0.5px solid rgba(255,255,255,0.12); padding-top:14px;">
+                <p style="font-size:12px; color:rgba(255,255,255,0.5); margin:0 0 10px;">
+                    Receipt unclear or incorrect? Ask the customer to reupload.
+                </p>
+                <button type="button" class="btn-decline" style="width:100%;"
+                    ${hasReceipt ? `onclick="document.getElementById('resubmitBookingId').value='${d.id}'; openMini('miniResubmit');"` : 'disabled'}>
+                    Request Resubmit
+                </button>
+            </div>
+        </div>
+
+        <form id="formConfirmPay" method="POST" action="bookingconfirmation.php" style="display:none;">
+            <input type="hidden" name="booking_id" value="${d.id}">
+            <input type="hidden" name="action_confirm_payment" value="1">
+        </form>`;
+}
 
             /* ── APPROVED: Complete or Cancel (with reason) ── */
             else if (d.status === 'Approved') {
@@ -957,9 +1045,9 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
         }
 
         /* ── View button click handler ── */
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.viewBtn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const d = this.dataset;
 
                     document.getElementById('dId').textContent = d.id;
@@ -973,6 +1061,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                     document.getElementById('dEventType').textContent = d.eventtype;
                     document.getElementById('dBarSetup').textContent = d.barsetup;
                     document.getElementById('dBottle').textContent = d.bottle;
+                    document.getElementById('dMirror').textContent = d.mirror || 'N/A';
                     document.getElementById('dPerfumes').textContent = d.perfumes || 'None';
                     document.getElementById('dNotes').textContent = d.notes || 'No notes provided.';
 
@@ -1001,6 +1090,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                         receipt: d.receipt,
                         refundReceipt: d.refundreceipt,
                         cancelNote: d.cancelnote,
+                        resubmit: d.resubmit,
                     });
 
                     document.getElementById('detailModal').classList.add('open');
@@ -1009,7 +1099,7 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
 
             /* ── Status filter card click handler ── */
             document.querySelectorAll('.statusCard').forEach(card => {
-                card.addEventListener('click', function() {
+                card.addEventListener('click', function () {
                     document.querySelectorAll('.statusCard').forEach(c => c.classList.remove('activeFilter'));
                     this.classList.add('activeFilter');
                     const sel = this.dataset.filter;
@@ -1020,6 +1110,49 @@ while ($row = mysqli_fetch_assoc($cancelledQuery)) {
                 });
             });
         });
+    </script>
+
+    <!-- BURGER MENU JS -->
+    <script>
+        (function () {
+            var burger = document.getElementById('burgerBtn');
+            var sidebar = document.getElementById('adminSidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (!burger || !sidebar || !overlay) return;
+
+            function openSidebar() {
+                sidebar.classList.add('drawer-open');
+                overlay.classList.add('active');
+                burger.classList.add('is-open');
+                burger.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('drawer-open');
+                overlay.classList.remove('active');
+                burger.classList.remove('is-open');
+                burger.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+
+            burger.addEventListener('click', function () {
+                sidebar.classList.contains('drawer-open') ? closeSidebar() : openSidebar();
+            });
+            overlay.addEventListener('click', closeSidebar);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            var touchStartX = 0;
+            sidebar.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+            sidebar.addEventListener('touchend', function (e) { if (touchStartX - e.changedTouches[0].clientX > 55) closeSidebar(); }, { passive: true });
+
+            var page = window.location.pathname.split('/').pop().split('?')[0];
+            sidebar.querySelectorAll('a').forEach(function (a) {
+                var href = (a.getAttribute('href') || '').split('?')[0].split('/').pop();
+                if (href === page) a.classList.add('nav-active');
+            });
+        })();
     </script>
 
 </body>

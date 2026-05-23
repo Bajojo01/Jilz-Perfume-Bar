@@ -1,6 +1,20 @@
 <?php
 session_start();
 require("db.php");
+// ======================secure======================
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$adminUsername = 'Admin';
+if (isset($_SESSION['admin_id'])) {
+    $adminId = (int) $_SESSION['admin_id'];
+    $adminResult = mysqli_query($conn, "SELECT Username FROM Admin_Information WHERE Admin_ID_PK = $adminId");
+    if ($adminRow = mysqli_fetch_assoc($adminResult)) {
+        $adminUsername = $adminRow['Username'];
+    }
+}
 
 if (isset($_GET['logout'])) {
     session_unset();
@@ -9,14 +23,12 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-/* UPLOAD IMAGE */
 function uploadImage($file)
 {
     if (!isset($file['name']) || $file['name'] == "") return null;
     $targetDir = "uploads/gallery/";
     if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
 
-    // Get extension from MIME type — never trust the original filename
     $mimeType = $file['type'];
     $mimeMap = [
         'image/jpeg' => 'jpg',
@@ -28,7 +40,6 @@ function uploadImage($file)
     ];
     $fileExt = $mimeMap[$mimeType] ?? 'jpg';
 
-    // Use only timestamp + random string — no original filename, no special char issues
     $cleanFilename = time() . "_" . bin2hex(random_bytes(6)) . "." . $fileExt;
     $destPath = $targetDir . $cleanFilename;
     if (move_uploaded_file($file["tmp_name"], $destPath)) return $destPath;
@@ -40,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $imgPath = uploadImage($_FILES['galleryImg'] ?? []);
     $uploadedAt = date('Y-m-d H:i:s');
     if ($imgPath) {
-        $stmt = mysqli_prepare($conn, "INSERT INTO gallery_pictures (Img_URL, Uploaded_At) VALUES (?, ?)");
+        $stmt = mysqli_prepare($conn, "INSERT INTO Gallery_Pictures (Img_URL, Uploaded_At) VALUES (?, ?)");
         mysqli_stmt_bind_param($stmt, "ss", $imgPath, $uploadedAt);
         mysqli_stmt_execute($stmt);
     }
@@ -51,11 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 /* DELETE SINGLE IMAGE */
 if (isset($_GET['deleteGallery'])) {
     $galleryId = intval($_GET['deleteGallery']);
-    $galleryRow = mysqli_fetch_assoc(mysqli_query($conn, "SELECT Img_URL FROM gallery_pictures WHERE Gallery_ID_PK=$galleryId"));
+    $galleryRow = mysqli_fetch_assoc(mysqli_query($conn, "SELECT Img_URL FROM Gallery_Pictures WHERE Gallery_ID_PK=$galleryId"));
     if ($galleryRow && file_exists($galleryRow['Img_URL'])) {
         unlink($galleryRow['Img_URL']);
     }
-    $stmt = mysqli_prepare($conn, "DELETE FROM gallery_pictures WHERE Gallery_ID_PK=?");
+    $stmt = mysqli_prepare($conn, "DELETE FROM Gallery_Pictures WHERE Gallery_ID_PK=?");
     mysqli_stmt_bind_param($stmt, "i", $galleryId);
     mysqli_stmt_execute($stmt);
     header("Location: manageGallery.php");
@@ -67,9 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $selectedIds = $_POST['selectedIds'] ?? [];
     foreach ($selectedIds as $galleryId) {
         $galleryId = intval($galleryId);
-        $galleryRow = mysqli_fetch_assoc(mysqli_query($conn, "SELECT Img_URL FROM gallery_pictures WHERE Gallery_ID_PK=$galleryId"));
+        $galleryRow = mysqli_fetch_assoc(mysqli_query($conn, "SELECT Img_URL FROM Gallery_Pictures WHERE Gallery_ID_PK=$galleryId"));
         if ($galleryRow && file_exists($galleryRow['Img_URL'])) unlink($galleryRow['Img_URL']);
-        $stmt = mysqli_prepare($conn, "DELETE FROM gallery_pictures WHERE Gallery_ID_PK=?");
+        $stmt = mysqli_prepare($conn, "DELETE FROM Gallery_Pictures WHERE Gallery_ID_PK=?");
         mysqli_stmt_bind_param($stmt, "i", $galleryId);
         mysqli_stmt_execute($stmt);
     }
@@ -81,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $filterDateFrom = $_GET['dateFrom'] ?? '';
 $filterDateTo   = $_GET['dateTo']   ?? '';
 
-$gallerySQL = "SELECT * FROM gallery_pictures";
+$gallerySQL = "SELECT * FROM Gallery_Pictures";
 $whereClause = [];
 if ($filterDateFrom) $whereClause[] = "DATE(Uploaded_At) >= '" . mysqli_real_escape_string($conn, $filterDateFrom) . "'";
 if ($filterDateTo)   $whereClause[] = "DATE(Uploaded_At) <= '" . mysqli_real_escape_string($conn, $filterDateTo) . "'";
@@ -90,6 +101,7 @@ $gallerySQL .= " ORDER BY Uploaded_At DESC";
 $galleryResult = mysqli_query($conn, $gallerySQL);
 $totalImageCount = mysqli_num_rows($galleryResult);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -101,27 +113,46 @@ $totalImageCount = mysqli_num_rows($galleryResult);
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="admin.css">
-    <link rel="stylesheet" href="mobisleStyle.css">
+    <link rel="stylesheet" href="adminGalleryMobile.css">
 
 </head>
 
 <body class="adminBG">
 
+    <!-- BURGER OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MOBILE TOP BAR -->
+    <div class="mobile-topbar">
+        <div class="mobile-topbar-brand">
+            <img src="assets/Logo_Tentative.png" alt="Jilz Logo">
+            <span>Admin</span>
+        </div>
+        <button class="burger-btn" id="burgerBtn" aria-label="Open menu" aria-expanded="false">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
+    </div>
+
     <!-- SIDEBAR -->
-    <div class="asidebar">
-        <h1>Admin</h1>
+    <div class="asidebar" id="adminSidebar">
+        <h1 style="margin-bottom:8vw;">Admin</h1>
         <div class="roww">
-            <img src="assets/Logo_Tentative.png" class="adminpic">
+            
             <div id="adminnameemail">
-                <h3>Username</h3>
-                <p>Email</p>
+                <h3>
+                    <?= htmlspecialchars($adminUsername); ?>
+                </h3>
             </div>
         </div>
         <hr>
         <ul>
             <li><a href="bookingconfirmation.php">Manage Bookings</a></li>
+            <li><a href="eventCalendar.php">Event Calendar</a></li>
             <li><a href="manageProducts.php">Manage Offerings</a></li>
             <li><a href="manageGallery.php">Manage Gallery</a></li>
+            <li><a href="ratingsfilter.php">Manage Reviews</a></li>
             <li><a href="addAdmin.php">Add Admin</a></li>
             <li><a href="#" onclick="openLogoutModal()">Logout</a></li>
         </ul>
@@ -372,6 +403,49 @@ $totalImageCount = mysqli_num_rows($galleryResult);
             });
             document.getElementById('galleryBulkDelForm').submit();
         }
+    </script>
+
+    <!-- BURGER MENU JS -->
+    <script>
+        (function () {
+            var burger  = document.getElementById('burgerBtn');
+            var sidebar = document.getElementById('adminSidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            if (!burger || !sidebar || !overlay) return;
+
+            function openSidebar() {
+                sidebar.classList.add('drawer-open');
+                overlay.classList.add('active');
+                burger.classList.add('is-open');
+                burger.setAttribute('aria-expanded', 'true');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('drawer-open');
+                overlay.classList.remove('active');
+                burger.classList.remove('is-open');
+                burger.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+
+            burger.addEventListener('click', function () {
+                sidebar.classList.contains('drawer-open') ? closeSidebar() : openSidebar();
+            });
+            overlay.addEventListener('click', closeSidebar);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            var touchStartX = 0;
+            sidebar.addEventListener('touchstart', function (e) { touchStartX = e.touches[0].clientX; }, { passive: true });
+            sidebar.addEventListener('touchend',   function (e) { if (touchStartX - e.changedTouches[0].clientX > 55) closeSidebar(); }, { passive: true });
+
+            var page = window.location.pathname.split('/').pop().split('?')[0];
+            sidebar.querySelectorAll('a').forEach(function (a) {
+                var href = (a.getAttribute('href') || '').split('?')[0].split('/').pop();
+                if (href === page) a.classList.add('nav-active');
+            });
+        })();
     </script>
 </body>
 

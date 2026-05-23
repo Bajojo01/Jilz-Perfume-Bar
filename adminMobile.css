@@ -1,0 +1,441 @@
+
+@media (max-width: 956px) {
+
+    /* Layout */
+    body.adminBG {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    /* Sidebar  */
+    .asidebar {
+        width: 100%;
+        height: auto;
+        padding: 14px 20px 0;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+    }
+
+    .asidebar h1 {
+        font-size: 1.6rem;
+        padding: 0;
+        margin-bottom: 6px;
+    }
+
+    .roww {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .adminpic {
+        width: 3rem;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    #adminnameemail h3 {
+        font-size: 0.9rem;
+        color: var(--white);
+        margin: 0;
+    }
+
+    #adminnameemail p {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.65);
+        margin: 0;
+    }
+
+    .asidebar hr {
+        border-color: rgba(255, 255, 255, 0.15);
+        margin: 6px 0 0;
+    }
+
+    .asidebar ul {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 0;
+        padding: 6px 0 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        list-style: none;
+    }
+
+    .asidebar ul::-webkit-scrollbar { display: none; }
+
+    .asidebar ul li {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .asidebar a {
+        font-size: 0.82rem;
+        padding: 7px 14px;
+        white-space: nowrap;
+        display: block;
+    }
+
+    /* Main content */
+    .bookingPageWrap {
+        flex: 1;
+        padding: 20px 20px 40px;
+        min-height: auto;
+        box-sizing: border-box;
+    }
+
+    .bookingPageWrap > h1 {
+        font-size: 2rem;
+        margin: 0 0 20px;
+    }
+
+    /* Status cards — */
+    .statusCardsRow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .statusCardsRow .statusCard:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .statusCard {
+        min-width: 0;
+        padding: 14px 10px;
+        border-radius: 12px;
+    }
+
+    /* Table wrap */
+    .bookingsTableWrap {
+        padding: 18px 16px;
+        border-radius: 12px;
+        overflow-x: unset;
+    }
+
+    .bookingsTableWrap h2 {
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+
+    /* Booking table → 2-column card grid */
+    .bookingTable {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        min-width: unset;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    .bookingTable thead { display: none; }
+
+    /* tbody: display:contents lets <tr> be direct grid children */
+    .bookingTable tbody { display: contents; }
+
+    /* Each <tr> = one card */
+    .bookingTable tbody tr {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        padding: 14px 14px 12px;
+        transition: box-shadow 0.2s, transform 0.15s;
+    }
+
+    .bookingTable tbody tr:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
+        transform: translateY(-1px);
+        background: #fff;
+    }
+
+    /* Each <td> = label stacked above value */
+    .bookingTable tbody td {
+        display: flex;
+        flex-direction: column;
+        padding: 3px 0;
+        font-size: 13px;
+        text-align: left;
+        border: none;
+        border-radius: 0 !important;
+        color: #222;
+        vertical-align: unset;
+    }
+
+    .bookingTable tbody td::before {
+        content: attr(data-label);
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #aaa;
+        margin-bottom: 2px;
+    }
+
+    /* Action cell (View button) — pinned to bottom-right of card */
+    .bookingTable tbody td:last-child {
+        margin-top: auto;
+        padding-top: 10px;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 8px;
+        align-items: flex-end;
+    }
+
+    .bookingTable tbody td:last-child::before { content: ''; }
+
+    .viewBtn {
+        padding: 7px 20px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+
+    /* Detail modal — bottom sheet */
+    .modalOverlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modalBox {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+    }
+
+    .modalHeader { padding: 18px 20px 14px; }
+    .modalSection { padding: 16px 20px; }
+
+    .infoGrid.cols4,
+    .infoGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .infoItem.fullCol { grid-column: 1 / -1; }
+
+    /* Mini modals */
+    .miniModalBox { width: calc(100vw - 48px); }
+    .miniModalBtns { gap: 10px; }
+    .miniModalBtns .btnConfirm,
+    .miniModalBtns .btnCancel { flex: 1; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   440px — MOBILE
+   1-column card list, compact sidebar.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 440px) {
+
+    .asidebar { padding: 12px 16px 0; }
+    .asidebar h1 { font-size: 1.4rem; }
+    .adminpic { width: 2.5rem; }
+    #adminnameemail h3 { font-size: 0.85rem; }
+    #adminnameemail p { font-size: 0.72rem; }
+    .asidebar ul { padding: 6px 0 8px; }
+    .asidebar a { font-size: 0.72rem; padding: 6px 10px; }
+    .asidebar a:hover { border-radius: 6px; }
+
+    .bookingPageWrap { padding: 16px; }
+    .bookingPageWrap > h1 { font-size: 1.6rem; margin: 0 0 16px; }
+
+    /* Status cards — keep 3-col */
+    .statusCardsRow {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .statusCardsRow .statusCard:first-child { padding: 12px 10px; }
+    .statusCardsRow .statusCard:first-child .cardCount { font-size: 28px; }
+
+    .statusCard { padding: 10px 6px; border-radius: 10px; }
+
+    .statusCard .cardLabel {
+        font-size: 8px;
+        letter-spacing: 0.04em;
+        margin-bottom: 5px;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .statusCard .cardDot { width: 7px; height: 7px; margin-right: 0; margin-bottom: 1px; }
+    .statusCard .cardCount { font-size: 22px; }
+
+    .bookingsTableWrap { padding: 14px 10px; border-radius: 10px; }
+    .bookingsTableWrap h2 { font-size: 1.1rem; margin-bottom: 10px; }
+
+    /* Override 956px grid → 1 column */
+    .bookingTable {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .bookingTable tbody tr {
+        border-radius: 10px;
+        padding: 10px 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09);
+    }
+
+    /* Label left / value right */
+    .bookingTable tbody td {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+        font-size: 12px;
+        color: #333;
+    }
+
+    .bookingTable tbody td::before {
+        font-size: 10px;
+        min-width: 90px;
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    .bookingTable tbody td:last-child {
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 8px;
+        margin-top: 4px;
+    }
+
+    .viewBtn { padding: 7px 18px; font-size: 12px; }
+
+    /* Modal */
+    .modalBox { max-height: 92vh; }
+    .modalHeader { padding: 16px 16px 14px; }
+    .modalHeader p { font-size: 14px; }
+    .modalCloseBtn { width: 32px; height: 32px; font-size: 16px; }
+    .modalSection { padding: 14px 16px; }
+    .customerName { font-size: 1.2rem; }
+
+    .infoItem .lbl {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.45);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 3px;
+    }
+
+    .infoItem .val { font-size: 12px; color: #fff; font-weight: 600; word-break: break-word; }
+
+    .sectionTitle {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: rgba(255, 255, 255, 0.4);
+        margin: 0 0 12px;
+    }
+
+    .actionArea { padding: 14px 16px 20px; }
+
+    .actionTitle {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 12px;
+    }
+
+    .actionBtns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .btn-accept, .btn-decline, .btn-complete,
+    .btn-refund, .btn-delete, .btn-cancel, .btn-confirm {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 14px;
+        font-size: 13px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .actionForm { display: flex; flex-direction: column; gap: 10px; }
+    .actionForm label { font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-bottom: 3px; }
+    .fileInput { font-size: 12px; color: rgba(255, 255, 255, 0.8); }
+
+    .cancelReasonForm { margin-top: 10px; }
+    .cancelReasonLbl { font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-bottom: 6px; }
+
+    .cancelReasonTa {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        color: #fff;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-family: 'Open Sans', sans-serif;
+        resize: vertical;
+        min-height: 72px;
+    }
+
+    .cancelReasonActions { display: flex; gap: 8px; margin-top: 8px; }
+
+    .btnCancelBack, .btnCancelSubmit {
+        flex: 1;
+        padding: 9px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .btnCancelBack { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    .btnCancelSubmit { background: #c0392b; color: #fff; }
+
+    .cancelNoteBox {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
+    }
+
+    .cancelNoteLabel { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.4); margin-bottom: 4px; }
+    .cancelNoteText { font-size: 12px; color: rgba(255, 255, 255, 0.85); line-height: 1.4; }
+
+    .receiptImg { width: 100%; border-radius: 8px; margin-top: 8px; }
+
+    .paymentLeft, .paymentRight {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-right: 0;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+
+    .paymentRight { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+    .gcashQR { width: 100%; max-width: 200px; border-radius: 8px; margin-top: 8px; }
+
+    .miniModalBox { width: calc(100vw - 32px); padding: 22px 18px 16px; }
+    .miniModalBox h3 { font-size: 15px; }
+    .miniModalBox p { font-size: 12px; }
+    .miniModalBtns { gap: 8px; }
+    .miniModalBtns .btnConfirm, .miniModalBtns .btnCancel { padding: 9px 16px; font-size: 13px; flex: 1; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   360px — VERY SMALL PHONES
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+    .statusCardsRow { grid-template-columns: 1fr 1fr; }
+    .statusCardsRow .statusCard:first-child { grid-column: 1 / -1; }
+    .statusCard .cardLabel { font-size: 7px; }
+    .statusCard .cardCount { font-size: 20px; }
+    .infoGrid, .infoGrid.cols4 { grid-template-columns: 1fr; }
+    .bookingPageWrap > h1 { font-size: 1.3rem; }
+}
+
+
+

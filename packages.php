@@ -1,30 +1,46 @@
 <?php
 session_start();
+// profile pic
+function getAvatarColor($username) {
+    $palette = [
+        ['bg' => '#EEEDFE', 'text' => '#3C3489'],
+        ['bg' => '#E1F5EE', 'text' => '#085041'],
+        ['bg' => '#FAECE7', 'text' => '#712B13'],
+        ['bg' => '#FBEAF0', 'text' => '#72243E'],
+        ['bg' => '#E6F1FB', 'text' => '#0C447C'],
+        ['bg' => '#EAF3DE', 'text' => '#27500A'],
+        ['bg' => '#FAEEDA', 'text' => '#633806'],
+        ['bg' => '#FCF0F0', 'text' => '#791F1F'],
+    ];
+    $hash = 0;
+    foreach (str_split($username) as $char) {
+        $hash = ord($char) + (($hash << 5) - $hash);
+    }
+    return $palette[abs($hash) % count($palette)];
+}
+
+$username   = $_SESSION['Username'] ?? 'Guest';
+$avatarColor = getAvatarColor($username);
+$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+
 require("db.php");
 
-$packages = mysqli_query($conn, "SELECT * FROM packages p JOIN bottle b ON p.Bottle_ID_FK = b.Bottle_ID_PK WHERE p.Package_Status = 'Available'");
-$bottles = mysqli_query($conn, "SELECT * FROM bottle_variants bv JOIN bottle b ON bv.Bottle_ID_FK = b.Bottle_ID_PK");
-$setup = mysqli_query($conn, "SELECT * FROM bar_setup");
+$packages = mysqli_query($conn, "SELECT * FROM Packages p JOIN Bottle b ON p.Bottle_ID_FK = b.Bottle_ID_PK WHERE p.Package_Status = 'Available'");
+$bottles  = mysqli_query($conn, "SELECT * FROM Bottle_Variants bv JOIN Bottle b ON bv.Bottle_ID_FK = b.Bottle_ID_PK");
+$setup    = mysqli_query($conn, "SELECT * FROM Bar_Setup");
 
-$packageRatings = mysqli_query($conn, "SELECT 
-    Package_ID_FK,
-    ROUND(AVG(Rating), 1) AS avg_rating,
-    COUNT(*) AS total_reviews
-    FROM package_ratings
-    GROUP BY Package_ID_FK");
-
+$packageRatings = mysqli_query($conn, "SELECT Package_ID_FK, ROUND(AVG(Rating),1) AS avg_rating, COUNT(*) AS total_reviews FROM Package_Ratings GROUP BY Package_ID_FK");
 $pkgRatingMap = [];
 while ($pr = mysqli_fetch_assoc($packageRatings)) {
     $pkgRatingMap[$pr['Package_ID_FK']] = $pr;
 }
 
-$packageReviewsQuery = mysqli_query($conn, "SELECT 
-    pr.Rating, pr.Description, pr.User_ID_FK, pr.Package_ID_FK,
-    ui.First_Name, ui.Last_Name,
-    p.Package_Name
-    FROM package_ratings pr
-    JOIN packages p ON pr.Package_ID_FK = p.Package_ID_PK
-    JOIN user_information ui ON pr.User_ID_FK = ui.User_ID_PK
+$packageReviewsQuery = mysqli_query($conn, "SELECT
+    pr.Rating, pr.Description, pr.is_hidden, pr.User_ID_FK, pr.Package_ID_FK,
+    ui.First_Name, ui.Last_Name, p.Package_Name
+    FROM Package_Ratings pr
+    JOIN Packages p ON pr.Package_ID_FK = p.Package_ID_PK
+    JOIN User_Information ui ON pr.User_ID_FK = ui.User_ID_PK
     ORDER BY pr.Package_Rating_ID_PK DESC");
 
 $packageReviewsByPkg = [];
@@ -32,7 +48,6 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
     $packageReviewsByPkg[$row['Package_ID_FK']][] = $row;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -41,9 +56,9 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jilz Perfume Bar | Packages</title>
     <link rel="shortcut icon" href="assets/Logo_Tentative.png" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="mobileStyle.css">
     <script>
         function openDrawer() {
@@ -62,10 +77,7 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
 
 <body>
 
-    <!-- MOBILE NAV OVERLAY -->
     <div class="mobileNavOverlay" id="mobileNavOverlay" onclick="closeDrawer()"></div>
-
-    <!-- MOBILE NAV DRAWER -->
     <div class="mobileNavDrawer" id="mobileNavDrawer">
         <div class="drawerHeader">
             <img class="drawerLogo" src="assets/Logo_Tentative.png" alt="Jilz">
@@ -73,8 +85,14 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         </div>
         <?php if (isset($_SESSION['UserID']) || isset($_SESSION['AdminID'])): ?>
             <div class="drawerUserProfile" onclick="window.location.href='profile.php'">
-                <img src="assets/user.png" alt="Profile">
-                <span>My Profile</span>
+                <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0;
+"><?= htmlspecialchars($avatarLetter) ?></div>
+<span>My Profile</span>
             </div>
         <?php else: ?>
             <div class="drawerAuthBtns">
@@ -91,10 +109,16 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         </ul>
     </div>
 
-    <!-- HEADER -->
     <Header>
         <div class="logo">
-            <img src="assets/Logo_Tentative.png">
+            <div class="logoBrand" onclick="window.location.href='index.php'">
+                <img src="assets/Logo_Tentative.png" alt="Jilz Logo">
+                <div class="logoDivider"></div>
+                <div class="logoBrandText">
+                    <span class="brandName">Jilz</span>
+                    <span class="brandSub">perfume bar</span>
+                </div>
+            </div>
         </div>
         <div id="nav" class="navs">
             <ul>
@@ -103,15 +127,21 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                 <li><a href="perfumes.php">Perfumes</a></li>
                 <li><a href="booking.php">Booking</a></li>
                 <li><a href="aboutUs.php">About</a></li>
-                <li class="prof" style="display: none;"><a href="profile.php"><b>Profile</b></a></li>
+                <li class="prof" style="display:none;"><a href="profile.php"><b>Profile</b></a></li>
             </ul>
         </div>
         <?php if (isset($_SESSION['UserID']) || isset($_SESSION['AdminID'])): ?>
-            <div class="userProfile" style="display: flex;">
-                <img onclick="window.location.href='profile.php'" src="assets/user.png" alt="User Profile">
+            <div class="userProfile" style="display:flex;">
+                <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0; border:solid 1.5px;cursor: pointer;
+"onclick="window.location.href='profile.php'" ><?= htmlspecialchars($avatarLetter) ?></div>
             </div>
         <?php else: ?>
-            <div class="loginOrSignup" style="display: flex;">
+            <div class="loginOrSignup" style="display:flex;">
                 <button class="loginButton" onclick="location.href='login.php';"><b>Log in</b></button>
                 <button class="signupButton" onclick="location.href='signup.php';"><b>Sign up</b></button>
             </div>
@@ -121,7 +151,7 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         </div>
     </Header>
 
-    <!-- PACKAGE LISTS -->
+    <!-- PACKAGE LIST -->
     <h1 id="packageTitle">Perfume Bar Packages</h1>
     <section class="package">
         <?php while ($package = mysqli_fetch_assoc($packages)): ?>
@@ -130,18 +160,16 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                     <div class="description">
                         <div class="namep">
                             <h1><?php echo $package['Package_Name']; ?></h1>
-                            <p style="font-size: 0.88rem; line-height: 1.8; color: #7A746C;">Starting Price:</p>
+                            <p style="font-size:0.88rem;line-height:1.8;color:#7A746C;">Starting Price:</p>
                             <p>₱<?php echo $package['Price']; ?></p>
-
                             <?php
-                            $pkgID = $package['Package_ID_PK'];
-                            $avg = isset($pkgRatingMap[$pkgID]) ? (float)$pkgRatingMap[$pkgID]['avg_rating'] : 0;
-                            $total = isset($pkgRatingMap[$pkgID]) ? (int)$pkgRatingMap[$pkgID]['total_reviews'] : 0;
+                            $pkgID   = $package['Package_ID_PK'];
+                            $avg     = isset($pkgRatingMap[$pkgID]) ? (float)$pkgRatingMap[$pkgID]['avg_rating'] : 0;
+                            $total   = isset($pkgRatingMap[$pkgID]) ? (int)$pkgRatingMap[$pkgID]['total_reviews'] : 0;
                             $rounded = round($avg * 2) / 2;
                             ?>
                             <div class="pkgRatingRow">
-                                <a href="#packageReviews" class="pkgRatingAnchor"
-                                    onclick="switchReviewTab('<?php echo $pkgID; ?>', null)">
+                                <a href="#packageReviews" class="pkgRatingAnchor" onclick="switchReviewTab('<?php echo $pkgID; ?>',null)">
                                     <div class="pkgStars">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
                                             <span class="pkgStar <?php echo $rounded >= $i ? 'full' : ($rounded >= $i - 0.5 ? 'half' : 'empty'); ?>">★</span>
@@ -155,12 +183,10 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                             <br>
                             <hr>
                         </div>
-
                         <div class="packageDesc">
                             <div class="detailp">
                                 <img src="assets/checked.png">
-                                <p><?php echo $package['No_of_Bottles']; ?>pcs
-                                    <?php echo $package['Bottle_Name']; ?> Glass Spray Bottles</p>
+                                <p><?php echo $package['No_of_Bottles']; ?>pcs <?php echo $package['Bottle_Name']; ?> Glass Spray Bottles</p>
                             </div>
                             <div class="detailp">
                                 <img src="assets/checked.png">
@@ -171,7 +197,6 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                                 <p><?php echo $package['No_of_Scent']; ?> Scent of Choices</p>
                             </div>
                         </div>
-
                         <form class="buttonp" action="booking.php" method="GET">
                             <input type="hidden" name="package_id" value="<?php echo $package['Package_ID_PK']; ?>">
                             <button type="submit">Book</button>
@@ -182,24 +207,23 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         <?php endwhile; ?>
     </section>
 
-    <!-- INCLUDED IN THE PACKAGE -->
+    <!-- WHAT'S INCLUDED -->
     <section class="bar">
         <div class="perfumeBar">
             <h1 class="incl-heading">What's Included in the Package?</h1>
             <div class="incl-tabs" role="tablist">
-                <button class="incl-tab active" role="tab" aria-selected="true" onclick="switchTab('perfumes', this)">Perfumes</button>
-                <button class="incl-tab" role="tab" aria-selected="false" onclick="switchTab('bottles', this)">Bottles</button>
-                <button class="incl-tab" role="tab" aria-selected="false" onclick="switchTab('setup', this)">Bar Setup</button>
-                <button class="incl-tab" role="tab" aria-selected="false" onclick="switchTab('mirror', this)">Selfie Mirror</button>
-                <button class="incl-tab" role="tab" aria-selected="false" onclick="switchTab('signage', this)">Signage</button>
+                <button class="incl-tab active" role="tab" onclick="switchTab('perfumes',this)">Perfumes</button>
+                <button class="incl-tab" role="tab" onclick="switchTab('bottles',this)">Bottles</button>
+                <button class="incl-tab" role="tab" onclick="switchTab('setup',this)">Bar Setup</button>
+                <button class="incl-tab" role="tab" onclick="switchTab('mirror',this)">Selfie Mirror</button>
+                <button class="incl-tab" role="tab" onclick="switchTab('signage',this)">Signage</button>
             </div>
 
             <div id="tab-perfumes" class="incl-panel active" role="tabpanel">
                 <div class="incl-layout">
                     <div class="incl-text">
                         <h3>1. Perfumes</h3>
-                        <p>A curated selection of perfumes provided for guests to explore and choose
-                            according to their own likings.</p>
+                        <p>A curated selection of perfumes provided for guests to explore and choose according to their own likings.</p>
                         <a href="perfumes.php" class="incl-link-btn">Go to Perfume Page &rarr;</a>
                     </div>
                     <div class="incl-visual">
@@ -224,8 +248,7 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                             <?php while ($bottle = mysqli_fetch_assoc($bottles)): ?>
                                 <div class="gallery-card" onclick="openOverlay('<?php echo htmlspecialchars($bottle['Bottle_Img']); ?>')">
                                     <div class="gallery-card__img">
-                                        <img src="<?php echo htmlspecialchars($bottle['Bottle_Img']); ?>"
-                                            alt="<?php echo htmlspecialchars($bottle['Bottle_Var_Name']); ?>">
+                                        <img src="<?php echo htmlspecialchars($bottle['Bottle_Img']); ?>" alt="<?php echo htmlspecialchars($bottle['Bottle_Var_Name']); ?>">
                                     </div>
                                     <p class="gallery-card__cap"><?php echo htmlspecialchars($bottle['Bottle_Var_Name']); ?> <?php echo htmlspecialchars($bottle['Bottle_Name']); ?></p>
                                 </div>
@@ -253,8 +276,7 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                             <?php while ($barSetups = mysqli_fetch_assoc($setup)): ?>
                                 <div class="gallery-card" onclick="openOverlay('<?php echo htmlspecialchars($barSetups['Bar_Img'] ?? 'assets/barSetup.png'); ?>')">
                                     <div class="gallery-card__img">
-                                        <img src="<?php echo htmlspecialchars($barSetups['Bar_Img'] ?? 'assets/barSetup.png'); ?>"
-                                            alt="<?php echo htmlspecialchars($barSetups['Bar_Name']); ?>">
+                                        <img src="<?php echo htmlspecialchars($barSetups['Bar_Img'] ?? 'assets/barSetup.png'); ?>" alt="<?php echo htmlspecialchars($barSetups['Bar_Name']); ?>">
                                     </div>
                                     <p class="gallery-card__cap"><?php echo htmlspecialchars($barSetups['Bar_Name']); ?></p>
                                 </div>
@@ -277,8 +299,22 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                             <li><img src="assets/checked.png" alt=""> Decorative accents</li>
                         </ul>
                     </div>
-                    <div class="incl-visual">
-                        <img src="assets/mirror.jpg" alt="Selfie Mirror" class="incl-single-img">
+                    <div class="incl-gallery">
+                        <?php
+                        $mirrorsForTab = mysqli_query($conn, "SELECT * FROM Selfie_Mirror WHERE Mirror_Status = 'Available'");
+                        if ($mirrorsForTab && mysqli_num_rows($mirrorsForTab) > 0):
+                            while ($mir = mysqli_fetch_assoc($mirrorsForTab)):
+                        ?>
+                                <div class="gallery-card" onclick="openOverlay('<?php echo htmlspecialchars($mir['Mirror_Img']); ?>')">
+                                    <div class="gallery-card__img">
+                                        <img src="<?php echo htmlspecialchars($mir['Mirror_Img']); ?>" alt="<?php echo htmlspecialchars($mir['Mirror_Name']); ?>">
+                                    </div>
+                                    <p class="gallery-card__cap"><?php echo htmlspecialchars($mir['Mirror_Name']); ?></p>
+                                </div>
+                            <?php endwhile;
+                        else: ?>
+                            <p class="incl-empty">No mirrors available.</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -308,13 +344,13 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         <img id="overlayImg" src="" alt="Preview">
     </div>
 
-    <!-- PACKAGE CUSTOMER REVIEWS -->
+    <!-- CUSTOMER REVIEWS -->
     <section class="customerReviews" id="packageReviews">
         <h2 class="reviewsTitle">Customer Reviews</h2>
         <div class="reviewPkgDropdownWrapper">
-            <select class="reviewPkgDropdown" onchange="switchReviewTab(this.value, null)">
+            <select class="reviewPkgDropdown" onchange="switchReviewTab(this.value,null)">
                 <?php
-                $packagesForTabs = mysqli_query($conn, "SELECT Package_ID_PK, Package_Name FROM packages WHERE Package_Status = 'Available'");
+                $packagesForTabs = mysqli_query($conn, "SELECT Package_ID_PK, Package_Name FROM Packages WHERE Package_Status = 'Available'");
                 while ($pkgTab = mysqli_fetch_assoc($packagesForTabs)):
                 ?>
                     <option value="<?php echo $pkgTab['Package_ID_PK']; ?>">
@@ -325,14 +361,14 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         </div>
 
         <?php
-        $packagesForReview = mysqli_query($conn, "SELECT * FROM packages p JOIN bottle b ON p.Bottle_ID_FK = b.Bottle_ID_PK WHERE p.Package_Status = 'Available'");
+        $packagesForReview = mysqli_query($conn, "SELECT * FROM Packages p JOIN Bottle b ON p.Bottle_ID_FK = b.Bottle_ID_PK WHERE p.Package_Status = 'Available'");
         $firstPanel = true;
         while ($pkg = mysqli_fetch_assoc($packagesForReview)):
-            $pkgID = $pkg['Package_ID_PK'];
-            $reviews = $packageReviewsByPkg[$pkgID] ?? [];
-            $total = count($reviews);
-            $avg = $total > 0 ? array_sum(array_column($reviews, 'Rating')) / $total : 0;
-            $rounded = round($avg * 2) / 2;
+            $pkgID    = $pkg['Package_ID_PK'];
+            $reviews  = $packageReviewsByPkg[$pkgID] ?? [];
+            $total    = count($reviews);
+            $avg      = $total > 0 ? array_sum(array_column($reviews, 'Rating')) / $total : 0;
+            $rounded  = round($avg * 2) / 2;
             $starCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
             foreach ($reviews as $r) $starCounts[(int)$r['Rating']]++;
         ?>
@@ -353,12 +389,12 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                         <div class="reviewsRight">
                             <?php for ($s = 5; $s >= 1; $s--):
                                 $count = $starCounts[$s];
-                                $pct = ($count / $total) * 100;
+                                $pct   = ($count / $total) * 100;
                             ?>
                                 <div class="starBarRow">
                                     <span class="starBarLabel"><?php echo $s; ?> Star<?php echo $s > 1 ? 's' : ''; ?></span>
                                     <div class="starBarTrack">
-                                        <div class="starBarFill" style="width: <?php echo $pct; ?>%"></div>
+                                        <div class="starBarFill" style="width:<?php echo $pct; ?>%"></div>
                                     </div>
                                     <span class="starBarPct"><?php echo number_format($pct, 1); ?>%</span>
                                 </div>
@@ -366,8 +402,10 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                         </div>
                     </div>
                     <div class="reviewsList">
-                        <?php foreach ($reviews as $rev): ?>
-                            <div class="reviewCard">
+                        <?php foreach ($reviews as $rev):
+                            $isHidden = !empty($rev['is_hidden']);
+                        ?>
+                            <div class="reviewCard <?= $isHidden ? 'hidden-review' : '' ?>">
                                 <div class="reviewerInfo">
                                     <div class="reviewerAvatar"><?php echo strtoupper(substr($rev['First_Name'], 0, 1)); ?></div>
                                     <div>
@@ -379,7 +417,11 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
                                         </div>
                                     </div>
                                 </div>
-                                <p class="reviewDesc"><?php echo htmlspecialchars($rev['Description']); ?></p>
+                                <?php if ($isHidden): ?>
+                                    <p class="reviewDesc hidden-desc"></p>
+                                <?php else: ?>
+                                    <p class="reviewDesc"><?php echo htmlspecialchars($rev['Description']); ?></p>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -389,18 +431,26 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         endwhile; ?>
     </section>
 
-    <!-- FOOTER -->
     <Footer>
         <div class="platforms">
-            <img class="icons" onclick="window.open('https://web.facebook.com/profile.php?id=100083402345862', '_blank')" src="assets/facebook.png">
-            <img class="icons" onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=jilzevangelista@gmail.com', '_blank')" src="assets/gmail.png">
-            <img class="icons" onclick="window.open('https://web.facebook.com/profile.php?id=100083402345862', '_blank')" src="assets/contact.png">
+            <img class="icons"
+                onclick="window.open('https://web.facebook.com/profile.php?id=100083402345862', '_blank')"
+                src="assets/facebook.png" alt="Facebook">
+            <img class="icons"
+                onclick="window.open('https://mail.google.com/mail/?view=cm&fs=1&to=jenprado13@gmail.com', '_blank')"
+                src="assets/gmail.png" alt="Gmail">
+            <img class="icons"
+                onclick="window.location.href='tel:+639615517623'"
+                src="assets/contact.png"
+                alt="Contact">
         </div>
         <div class="footNavs">
             <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="#">Packages</a></li>
+                <li><a href="#">Home</a></li>
+                <li><a href="packages.php">Packages</a></li>
                 <li><a href="perfumes.php">Perfumes</a></li>
+                <li><a href="booking.php">Booking</a></li>
+                <li><a href="aboutUs.php">About</a></li>
                 <li><a href="profile.php">Profile</a></li>
             </ul>
         </div>
@@ -411,15 +461,15 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
 
     <script>
         function switchTab(id, btn) {
-            document.querySelectorAll('.incl-tab').forEach(function(t) {
+            document.querySelectorAll('.incl-tab').forEach(t => {
                 t.classList.remove('active');
                 t.setAttribute('aria-selected', 'false');
             });
-            document.querySelectorAll('.incl-panel').forEach(function(p) {
-                p.classList.remove('active');
-            });
-            btn.classList.add('active');
-            btn.setAttribute('aria-selected', 'true');
+            document.querySelectorAll('.incl-panel').forEach(p => p.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+            }
             var panel = document.getElementById('tab-' + id);
             if (panel) panel.classList.add('active');
         }
@@ -442,15 +492,12 @@ while ($row = mysqli_fetch_assoc($packageReviewsQuery)) {
         }
 
         function switchReviewTab(pkgID, btn) {
-            document.querySelectorAll('.pkgReviewBlock').forEach(function(p) {
-                p.classList.remove('active');
-            });
+            document.querySelectorAll('.pkgReviewBlock').forEach(p => p.classList.remove('active'));
             var panel = document.getElementById('pkgReview-' + pkgID);
             if (panel) panel.classList.add('active');
             var dropdown = document.querySelector('.reviewPkgDropdown');
             if (dropdown) dropdown.value = pkgID;
         }
-
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeOverlay();
         });

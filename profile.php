@@ -1,5 +1,28 @@
 <?php
+session_start();//profile pic
 session_start();
+function getAvatarColor($username) {
+    $palette = [
+        ['bg' => '#EEEDFE', 'text' => '#3C3489'],
+        ['bg' => '#E1F5EE', 'text' => '#085041'],
+        ['bg' => '#FAECE7', 'text' => '#712B13'],
+        ['bg' => '#FBEAF0', 'text' => '#72243E'],
+        ['bg' => '#E6F1FB', 'text' => '#0C447C'],
+        ['bg' => '#EAF3DE', 'text' => '#27500A'],
+        ['bg' => '#FAEEDA', 'text' => '#633806'],
+        ['bg' => '#FCF0F0', 'text' => '#791F1F'],
+    ];
+    $hash = 0;
+    foreach (str_split($username) as $char) {
+        $hash = ord($char) + (($hash << 5) - $hash);
+    }
+    return $palette[abs($hash) % count($palette)];
+}
+
+$username   = $_SESSION['Username'] ?? 'Guest';
+$avatarColor = getAvatarColor($username);
+$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+
 require("db.php");
 
 if (isset($_GET['logout'])) {
@@ -16,7 +39,7 @@ if (!isset($_SESSION['UserID'])) {
 
 $editMode = isset($_GET['edit']) && $_GET['edit'] == 1;
 
-$getUserInfo = mysqli_query($conn, "SELECT * FROM user_information WHERE User_ID_PK = " . $_SESSION['UserID']);
+$getUserInfo = mysqli_query($conn, "SELECT * FROM User_Information WHERE User_ID_PK = " . $_SESSION['UserID']);
 
 if ($getUserInfo && mysqli_num_rows($getUserInfo) > 0) {
     $userInfo = mysqli_fetch_assoc($getUserInfo);
@@ -39,7 +62,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST') {
     $dob = $_POST['dob'] ?? '';
     $phone = $_POST['phone'] ?? '';
 
-    $sql = "UPDATE user_information 
+    $sql = "UPDATE User_Information 
             SET First_Name = ?, Last_Name = ?, Email = ?, Gender = ?, Birthday = ?, Phone_No = ?
             WHERE User_ID_PK = ?";
 
@@ -61,7 +84,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST') {
         $_SESSION['First_Name'] = $firstName;
         $_SESSION['Last_Name']  = $lastName;
         $_SESSION['Email']      = $email;
-        $_SESSION['Gender']    = $gender;
+        $_SESSION['Gender']     = $gender;
         $_SESSION['DOB']        = $dob;
         $_SESSION['Phone']      = $phone;
 
@@ -102,7 +125,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST') {
         </div>
 
         <div class="profileDrawerUser">
-            <img src="assets/user.png" alt="Profile">
+            <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0; padding-bottom: 10srem;
+"><?= htmlspecialchars($avatarLetter) ?></div>
             <span><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></span>
         </div>
 
@@ -122,9 +151,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST') {
     <div class="psidebar">
         <h1>Profile</h1>
         <div class="roww">
-            <img src="assets/Logo_Tentative.png" alt="" class="profilepic">
+            <div style="
+    width: 70px; height: 70px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 1000; font-size: 35px; flex-shrink: 0;
+"><?= htmlspecialchars($avatarLetter) ?></div>
             <div class="usernameemail">
-                <h3><?php echo isset($_SESSION['Username']) ? $_SESSION['Username'] : 'Guest'; ?></h3>
+                <h3><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></h3>
             </div>
         </div>
         <hr>

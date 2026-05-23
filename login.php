@@ -11,42 +11,36 @@ if (isset($_POST['login'])) {
     if (empty($username) || empty($password)) {
         $errorMsg = 'Please enter both username and password.';
     } else {
-        $sqlUser = "SELECT User_ID_PK, Pass FROM user_information WHERE Username = ?";
-        $stmtUser = mysqli_prepare($conn, $sqlUser);
-        mysqli_stmt_bind_param($stmtUser, "s", $username);
-        mysqli_stmt_execute($stmtUser);
-        mysqli_stmt_bind_result($stmtUser, $UserID, $UserPass);
-        mysqli_stmt_fetch($stmtUser);
-        mysqli_stmt_close($stmtUser);
-
-        $sqlAdmin = "SELECT Admin_ID_PK, Pass FROM admin_information WHERE Username = ?";
-        $stmtAdmin = mysqli_prepare($conn, $sqlAdmin);
+        $stmtAdmin = mysqli_prepare($conn, "SELECT Admin_ID_PK, Username, Pass FROM Admin_Information WHERE Username = ?");
         mysqli_stmt_bind_param($stmtAdmin, "s", $username);
         mysqli_stmt_execute($stmtAdmin);
-        mysqli_stmt_bind_result($stmtAdmin, $AdminID, $AdminPass);
-        mysqli_stmt_fetch($stmtAdmin);
+        mysqli_stmt_bind_result($stmtAdmin, $AdminID, $AdminUsername, $AdminPass);
+        $adminFound = mysqli_stmt_fetch($stmtAdmin);
         mysqli_stmt_close($stmtAdmin);
 
-        if ($UserPass) {
-            if (password_verify($password, $UserPass)) {
-                $_SESSION['Username'] = $username;
-                $_SESSION['UserID'] = $UserID;
-                header("Location: index.php");
-                exit();
-            } else {
-                $errorMsg = 'Incorrect password. Please try again.';
-            }
-        } elseif ($AdminPass) {
-            if (password_verify($password, $AdminPass)) {
-                $_SESSION['AdminUsername'] = $username;
-                $_SESSION['AdminID'] = $AdminID;
-                header("Location: bookingconfirmation.php");
-                exit();
-            } else {
-                $errorMsg = 'Incorrect password. Please try again.';
-            }
+        if ($adminFound && password_verify($password, $AdminPass)) {
+            $_SESSION['is_admin'] = true;
+            $_SESSION['admin_id'] = $AdminID;
+            $_SESSION['admin_user'] = $AdminUsername;
+
+            header("Location: bookingconfirmation.php");
+            exit();
+        }
+
+        $stmtUser = mysqli_prepare($conn, "SELECT User_ID_PK, Username, Pass FROM User_Information WHERE Username = ?");
+        mysqli_stmt_bind_param($stmtUser, "s", $username);
+        mysqli_stmt_execute($stmtUser);
+        mysqli_stmt_bind_result($stmtUser, $UserID, $UserUsername, $UserPass);
+        $userFound = mysqli_stmt_fetch($stmtUser);
+        mysqli_stmt_close($stmtUser);
+
+        if ($userFound && password_verify($password, $UserPass)) {
+            $_SESSION['UserID'] = $UserID;
+            $_SESSION['Username'] = $UserUsername;
+            header("Location: index.php");
+            exit();
         } else {
-            $errorMsg = 'No account found with that username.';
+            $errorMsg = 'Incorrect username or password.';
         }
     }
 }
@@ -68,7 +62,13 @@ if (isset($_POST['login'])) {
 <body class="loginsignupBG">
     <div class="loginsignuplogo">
         <img src="assets/Logo_Tentative.png">
-        <a href="index.php">← Back to homepage</a>
+        <?php
+        $defaultBack = 'index.php';
+        $back = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $defaultBack;
+        ?>
+        <a href="index.php">
+            ← Back to Home Page
+        </a>
     </div>
 
     <div class="loginsignupheader">
@@ -91,33 +91,14 @@ if (isset($_POST['login'])) {
 
             <!-- USERNAME -->
             <label for="username" class="formlabel">Username</label>
-            <input
-                id="username"
-                class="username <?php echo (!empty($errorMsg)) ? 'inputError' : ''; ?>"
-                type="text"
-                name="username"
-                placeholder="Enter your username"
-                value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>"
-                required>
+            <input id="username" class="username <?php echo (!empty($errorMsg)) ? 'inputError' : ''; ?>" type="text"
+                name="username" placeholder="Enter your username"
+                value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
 
             <!-- PASSWORD -->
             <label for="password" class="formlabel">Password</label>
-            <input
-                id="password"
-                class="password <?php echo (!empty($errorMsg)) ? 'inputError' : ''; ?>"
-                type="password"
-                name="password"
-                placeholder="Enter your password"
-                required>
-
-            <!-- REMEMBER ME + FORGOT PASSWORD -->
-            <div class="rememberme">
-                <div class="left">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Remember me</label>
-                </div>
-                <a href="forgot_password.php">Forgot password?</a>
-            </div>
+            <input id="password" class="password <?php echo (!empty($errorMsg)) ? 'inputError' : ''; ?>" type="password"
+                name="password" placeholder="Enter your password" required>
 
             <!-- BUTTON -->
             <button type="submit" class="loginsignupbtn" name="login">Login</button>

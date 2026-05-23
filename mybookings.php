@@ -1,5 +1,29 @@
 <?php
+// Profile pic setup
 session_start();
+function getAvatarColor($username)
+{
+    $palette = [
+        ['bg' => '#EEEDFE', 'text' => '#3C3489'],
+        ['bg' => '#E1F5EE', 'text' => '#085041'],
+        ['bg' => '#FAECE7', 'text' => '#712B13'],
+        ['bg' => '#FBEAF0', 'text' => '#72243E'],
+        ['bg' => '#E6F1FB', 'text' => '#0C447C'],
+        ['bg' => '#EAF3DE', 'text' => '#27500A'],
+        ['bg' => '#FAEEDA', 'text' => '#633806'],
+        ['bg' => '#FCF0F0', 'text' => '#791F1F'],
+    ];
+    $hash = 0;
+    foreach (str_split($username) as $char) {
+        $hash = ord($char) + (($hash << 5) - $hash);
+    }
+    return $palette[abs($hash) % count($palette)];
+}
+
+$username    = $_SESSION['Username'] ?? 'Guest';
+$avatarColor = getAvatarColor($username);
+$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+
 require("db.php");
 
 if (isset($_GET['logout'])) {
@@ -35,6 +59,8 @@ $myBookingsQuery = "SELECT
         bv.Bottle_Img,
         bs.Bar_Name,
         bs.Bar_Img,
+        sm.Mirror_Name,
+        sm.Mirror_Img,
         ui.First_Name,
         ui.Last_Name,
         ui.Phone_No,
@@ -45,6 +71,7 @@ $myBookingsQuery = "SELECT
     JOIN Bottle_Variants bv ON b.Bottle_Var_ID_FK = bv.Bottle_Var_ID_PK
     JOIN Bottle bt ON bv.Bottle_ID_FK = bt.Bottle_ID_PK
     JOIN Bar_Setup bs ON b.Bar_Setup_ID_FK = bs.Bar_Setup_ID_PK
+    JOIN Selfie_Mirror sm ON b.Selfie_Mirror_ID_FK = sm.Selfie_Mirror_ID_PK
     JOIN Booking_Perfume bp ON b.Booking_ID_PK = bp.Booking_ID_FK
     JOIN Perfume p ON bp.Perfume_ID_FK = p.Perfume_ID_PK
     JOIN User_Information ui ON b.User_ID_FK = ui.User_ID_PK
@@ -55,6 +82,7 @@ $myBookingsQuery = "SELECT
         b.Created_At, pk.Package_Name, pk.No_of_Bottles, pk.No_of_Scent,
         pk.Price, pk.Package_Img, bt.Bottle_Name, bt.Bottle_Size,
         bv.Bottle_Var_Name, bv.Bottle_Img, bs.Bar_Name, bs.Bar_Img,
+        sm.Mirror_Name, sm.Mirror_Img,
         ui.First_Name, ui.Last_Name, ui.Phone_No, ui.Email
     ORDER BY b.Created_At DESC";
 
@@ -72,19 +100,20 @@ foreach ($bookingRows as $b) {
 }
 $totalBookings = array_sum($statusCounts);
 
+// Handle cancel/refund submission
 if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['cancelBookingSubmit'])) {
-    $bookingID    = intval($_POST['cancelBookingId'] ?? 0);
+    $bookingId    = intval($_POST['cancelBookingId'] ?? 0);
     $cancelStatus = mysqli_real_escape_string($conn, $_POST['cancelStatus'] ?? '');
     $cancelNote   = mysqli_real_escape_string($conn, trim($_POST['cancelNote'] ?? ''));
     $allowedCancelStatuses = ['Cancelled', 'To Refund'];
 
-    if ($bookingID > 0 && in_array($cancelStatus, $allowedCancelStatuses) && $cancelNote !== '') {
+    if ($bookingId > 0 && in_array($cancelStatus, $allowedCancelStatuses) && $cancelNote !== '') {
         $refundStatus = ($cancelStatus === 'To Refund') ? 'To Refund' : 'Cancelled';
         $updateBooking = "UPDATE Booking SET Booking_Status = '$cancelStatus'
-                          WHERE Booking_ID_PK = $bookingID AND User_ID_FK = " . intval($_SESSION['UserID']);
+                          WHERE Booking_ID_PK = $bookingId AND User_ID_FK = " . intval($_SESSION['UserID']);
         mysqli_query($conn, $updateBooking);
         $insertCancelled = "INSERT INTO Booking_Cancelled (Booking_ID_FK, Refund_Status, Note)
-                            VALUES ($bookingID, '$refundStatus', '$cancelNote')";
+                            VALUES ($bookingId, '$refundStatus', '$cancelNote')";
         mysqli_query($conn, $insertCancelled);
         header("Location: " . ($_SERVER['PHP_SELF'] ?? null));
         exit();
@@ -92,7 +121,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['cancelBooki
 }
 
 $paymentQuery = "SELECT bp.Booking_ID_FK, bp.Additional_Fee, bp.Additional_Fee_Description, 
-                        bp.Gcash_Code, bp.Gcash_Number, bp.Gcash_Name, bp.Total_Price, bp.Customer_Receipt
+                        bp.Gcash_Code, bp.Gcash_Number, bp.Gcash_Name, bp.Total_Price,
+                        bp.Customer_Receipt, bp.Resubmit_Requested
                  FROM Booking_Payment bp
                  WHERE bp.Booking_ID_FK IN (
                      SELECT Booking_ID_PK FROM Booking WHERE User_ID_FK = " . intval($_SESSION['UserID']) . "
@@ -103,19 +133,50 @@ while ($row = mysqli_fetch_assoc($paymentResult)) {
     $paymentData[$row['Booking_ID_FK']] = $row;
 }
 
+// Handle mark as complete — only allowed after event end datetime has passed
+if (isset($_POST['markComplete'])) {
+    $bookingId = intval($_POST['markCompleteId'] ?? 0);
+    if ($bookingId > 0) {
+        // Fetch event date and end time to verify it has actually passed
+        $checkQuery = mysqli_query(
+            $conn,
+            "SELECT Event_Date, Event_Time_End FROM Booking
+             WHERE Booking_ID_PK = $bookingId
+             AND User_ID_FK = " . intval($_SESSION['UserID']) . "
+             AND Booking_Status = 'Approved'"
+        );
+        $checkRow = mysqli_fetch_assoc($checkQuery);
+        if ($checkRow) {
+            $eventEndDatetime = new DateTime($checkRow['Event_Date'] . ' ' . $checkRow['Event_Time_End']);
+            $now = new DateTime();
+            if ($now > $eventEndDatetime) {
+                mysqli_query(
+                    $conn,
+                    "UPDATE Booking SET Booking_Status = 'Completed'
+                     WHERE Booking_ID_PK = $bookingId
+                     AND User_ID_FK = " . intval($_SESSION['UserID'])
+                );
+                header("Location: " . ($_SERVER['PHP_SELF'] ?? null));
+                exit();
+            }
+        }
+    }
+}
+
+// Handle receipt upload
 if (isset($_POST['submitPayment'])) {
-    $bookingID    = intval($_POST['paymentBookingId']);
+    $bookingId    = intval($_POST['paymentBookingId']);
     $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (isset($_FILES['receiptImg']) && $_FILES['receiptImg']['error'] === 0) {
         if (in_array($_FILES['receiptImg']['type'], $allowedTypes)) {
             $uploadDir = 'uploads/receipts/';
             if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
             $ext        = pathinfo($_FILES['receiptImg']['name'], PATHINFO_EXTENSION);
-            $fileName   = 'receipt_' . $bookingID . '_' . time() . '.' . $ext;
+            $fileName   = 'receipt_' . $bookingId . '_' . time() . '.' . $ext;
             $targetPath = $uploadDir . $fileName;
             if (move_uploaded_file($_FILES['receiptImg']['tmp_name'], $targetPath)) {
                 $escapedFileName = mysqli_real_escape_string($conn, $fileName);
-                $updateQuery     = "UPDATE Booking_Payment SET Customer_Receipt = '$escapedFileName' WHERE Booking_ID_FK = $bookingID";
+                $updateQuery     = "UPDATE Booking_Payment SET Customer_Receipt = '$escapedFileName', Resubmit_Requested = 0 WHERE Booking_ID_FK = $bookingId";
                 mysqli_query($conn, $updateQuery);
                 header("Location: " . ($_SERVER['PHP_SELF'] ?? null));
                 exit();
@@ -136,205 +197,6 @@ if (isset($_POST['submitPayment'])) {
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mobileStyle.css">
-
-    <style>
-        .statusFilterRow {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 22px;
-        }
-
-        .statusFilterCard {
-            flex: 1;
-            min-width: 100px;
-            background: #f7f7f7;
-            border: 2px solid #e0e0e0;
-            border-radius: 14px;
-            padding: 14px 16px 12px;
-            cursor: pointer;
-            user-select: none;
-            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-        }
-
-        .statusFilterCard:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .statusFilterCard.active {
-            border-color: var(--cardColor, #333);
-            border-top-width: 3px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
-        }
-
-        .statusFilterCard .cardLabel {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: #888;
-            margin-bottom: 8px;
-        }
-
-        .statusFilterCard .cardDot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--cardColor, #888);
-            flex-shrink: 0;
-        }
-
-        .statusFilterCard .cardCount {
-            font-size: 30px;
-            font-weight: 800;
-            color: var(--cardColor, #111);
-            line-height: 1;
-        }
-
-        .statusFilterCard.cardAll .cardLabel {
-            color: #555;
-        }
-
-        .statusFilterCard.cardAll .cardCount {
-            color: #111;
-        }
-
-        .refundNotice {
-            background: #fff8e1;
-            border-left: 4px solid #f59e0b;
-            border-radius: 6px;
-            padding: 9px 13px;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #92400e;
-            line-height: 1.5;
-        }
-
-        .refundNotice strong {
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .cancelReasonOverlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cancelReasonBox {
-            background: #fff;
-            border-radius: 16px;
-            padding: 28px 28px 24px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-        }
-
-        .cancelReasonHeader {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 6px;
-        }
-
-        .cancelReasonHeader h3 {
-            margin: 0;
-            font-size: 17px;
-            color: #111;
-        }
-
-        .cancelReasonClose {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #888;
-            line-height: 1;
-            padding: 0 2px;
-        }
-
-        .cancelReasonClose:hover {
-            color: #333;
-        }
-
-        .cancelReasonSubtitle {
-            font-size: 13px;
-            color: #666;
-            margin: 0 0 16px;
-        }
-
-        .cancelReasonTextarea {
-            width: 100%;
-            min-height: 100px;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 10px 12px;
-            font-size: 13px;
-            font-family: inherit;
-            resize: vertical;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-            outline: none;
-        }
-
-        .cancelReasonTextarea:focus {
-            border-color: #3b82f6;
-        }
-
-        .cancelReasonError {
-            display: none;
-            color: #ef4444;
-            font-size: 12px;
-            margin: 5px 0 0;
-        }
-
-        .cancelReasonFooter {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 18px;
-        }
-
-        .cancelReasonConfirmBtn {
-            background: #ef4444;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 9px 22px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .cancelReasonConfirmBtn:hover {
-            background: #dc2626;
-        }
-
-        .cancelReasonBackBtn {
-            background: #f3f4f6;
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            padding: 9px 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .cancelReasonBackBtn:hover {
-            background: #e5e7eb;
-        }
-    </style>
 </head>
 
 <body class="myprofileBG">
@@ -350,7 +212,14 @@ if (isset($_POST['submitPayment'])) {
         </div>
 
         <div class="profileDrawerUser">
-            <img src="assets/user.png" alt="Profile">
+            <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0; padding-bottom: 10srem;
+"><?= htmlspecialchars($avatarLetter) ?></div>
+
             <span><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></span>
         </div>
 
@@ -363,16 +232,22 @@ if (isset($_POST['submitPayment'])) {
         </ul>
     </div>
 
-    <!-- Mobile burger button (top-right) -->
+    <!-- Mobile burger button -->
     <button class="profileBurger" onclick="openProfileDrawer()">&#9776;</button>
 
     <!-- Sidebar (desktop) -->
     <div class="mypsidebar">
         <h1>Profile</h1>
         <div class="roww">
-            <img src="assets/Logo_Tentative.png" alt="" class="profilepic">
+            <div style="
+    width: 70px; height: 70px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 1000; font-size: 35px; flex-shrink: 0;
+"><?= htmlspecialchars($avatarLetter) ?></div>
             <div class="usernameemail">
-                <h3>Username</h3>
+                <h3><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></h3>
             </div>
         </div>
         <hr>
@@ -452,6 +327,26 @@ if (isset($_POST['submitPayment'])) {
                                     Please wait for the owner to process your refund. You will be notified once it has been sent.
                                 </div>
                             <?php endif; ?>
+
+                            <?php if (!empty($paymentData[$booking['Booking_ID_PK']]['Resubmit_Requested'])): ?>
+                                <div style="
+                                    background: #fff3cd;
+                                    border-left: 4px solid #f59e0b;
+                                    border-radius: 6px;
+                                    padding: 10px 14px;
+                                    margin-top: 10px;
+                                    color: #78350f;
+                                    font-size: 13px;
+                                ">
+                                    <strong>&#9888; Please reupload your receipt.</strong><br>
+                                    The admin has flagged your receipt for resubmission. Please upload the correct image.
+                                    <br>
+                                    <button type="button" class="bookButton payBtn" style="margin-top:8px; background:none; color:red;"
+                                        onclick="openPayModal(<?= $booking['Booking_ID_PK']; ?>)">
+                                        Reupload Receipt
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <div class="prow">
@@ -468,8 +363,23 @@ if (isset($_POST['submitPayment'])) {
                                 <button class="bookButton" onclick="showDetails(<?= $booking['Booking_ID_PK']; ?>)">View Details</button>
                                 <?php if ($booking['Booking_Status'] !== 'To Refund'): ?>
                                     <button type="button" class="bookButton"
-                                        onclick="openCancelModal(<?= $booking['Booking_ID_PK']; ?>, '<?= htmlspecialchars($booking['Booking_Status']); ?>')">
+                                        onclick="openCancelModal(
+                                            <?= $booking['Booking_ID_PK']; ?>,
+                                            '<?= htmlspecialchars($booking['Booking_Status']); ?>',
+                                            '<?= htmlspecialchars($booking['Event_Date']); ?>'
+                                        )">
                                         Cancel
+                                    </button>
+                                <?php endif; ?>
+                                <?php if ($booking['Booking_Status'] === 'Approved'): ?>
+                                    <button type="button" class="bookButton"
+                                        style="background: #22c55e; color: #fff;"
+                                        onclick="openMarkCompleteModal(
+                                            <?= $booking['Booking_ID_PK']; ?>,
+                                            '<?= htmlspecialchars($booking['Event_Date']); ?>',
+                                            '<?= htmlspecialchars($booking['Event_Time_End']); ?>'
+                                        )">
+                                        Mark as Complete
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -538,6 +448,10 @@ if (isset($_POST['submitPayment'])) {
                         <p class="detailLabel">BOTTLE</p>
                         <p class="detailValue" id="detailBottle"></p>
                     </div>
+                    <div class="infos">
+                        <p class="detailLabel">SELFIE MIRROR</p>
+                        <p class="detailValue" id="detailMirror"></p>
+                    </div>
                     <div class="infos fullWidth">
                         <p class="detailLabel">PERFUMES SELECTED</p>
                         <p class="detailValue" id="detailPerfumes"></p>
@@ -578,6 +492,35 @@ if (isset($_POST['submitPayment'])) {
         </div>
     </div>
 
+    <!-- No-refund warning popup (shown when cancelling 6 days or less before event) -->
+    <div class="cancelReasonOverlay" id="noRefundWarningOverlay" style="display:none; z-index: 9999;">
+        <div class="cancelReasonBox" style="max-width: 420px;">
+            <div class="cancelReasonHeader">
+                <h3 style="color: #dc2626;">&#9888; No Refund Policy</h3>
+                <button class="cancelReasonClose" onclick="closeNoRefundWarning()">&#10005;</button>
+            </div>
+            <div style="text-align: center; padding: 6px 0 10px;">
+                <img src="assets/warning.png" alt="warning" style="width: 48px; margin-bottom: 8px;">
+            </div>
+            <p style="font-size: 14px; color: #374151; line-height: 1.6; margin-bottom: 10px;">
+                Your event is <strong id="noRefundDaysLeft"></strong> away.
+            </p>
+            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin-bottom: 14px;">
+                Based on our cancellation policy, <strong>refunds are only available if the booking is cancelled at least 1 week (7 days) before the scheduled event date.</strong>
+                Cancellations made <strong>6 days or less</strong> before the event are <strong style="color:#dc2626;">no longer eligible for a refund.</strong>
+            </p>
+            <p style="font-size: 13px; color: #374151; line-height: 1.6; margin-bottom: 18px;">
+                If you proceed, your booking will be marked as <strong>Cancelled</strong> and no refund will be issued.
+            </p>
+            <div class="cancelReasonFooter">
+                <button class="cancelReasonBackBtn" onclick="closeNoRefundWarning()">Go Back</button>
+                <button class="cancelReasonConfirmBtn" style="background: #dc2626;" onclick="proceedToNoRefundCancel()">
+                    I Understand, Cancel Anyway
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Payment modal -->
     <section class="popUp" id="paymentModal" style="display:none;">
         <div class="paymentBox">
@@ -597,6 +540,18 @@ if (isset($_POST['submitPayment'])) {
                             onerror="this.src='assets/gcash_qr_placeholder.png'">
                     </div>
                     <div class="uploadSection">
+
+                        <!-- Existing receipt display -->
+                        <div id="existingReceiptSection" style="display:none; margin-bottom:12px;">
+                            <p class="paySectionLabel" style="color:#22c55e;">Receipt Already Submitted</p>
+                            <p id="receiptStatusMsg" style="font-size:12px; color:#888; margin:0 0 8px;"></p>
+                            <img id="existingReceiptImg" src="" alt="Submitted Receipt"
+                                style="width:100%; max-width:260px; border-radius:8px; border:1px solid #ddd;">
+                            <p style="font-size:11px; color:#888; margin:6px 0 10px;">
+                                You can re-upload below to replace your receipt.
+                            </p>
+                        </div>
+
                         <p class="paySectionLabel">Upload Receipt</p>
                         <form id="paymentForm" method="POST" action="" enctype="multipart/form-data">
                             <input type="hidden" name="paymentBookingId" id="paymentBookingId">
@@ -649,6 +604,28 @@ if (isset($_POST['submitPayment'])) {
         </div>
     </section>
 
+    <!-- Mark as Complete confirmation popup -->
+    <section class="popUp" id="markCompletePopup" style="display:none;">
+        <div class="notif" style="max-width: 400px; text-align: center;">
+            <div class="icon">
+                <img src="assets/warning.png" alt="warning">
+                <p>Mark Event as Complete?</p>
+            </div>
+            <p class="errorMsg" style="text-align: center; margin-bottom: 6px;">
+                Are you sure you want to mark this event as complete?
+            </p>
+            <p id="markCompleteNote" style="font-size: 12px; color: #888; margin-bottom: 14px;"></p>
+            <form id="markCompleteForm" method="POST" action="">
+                <input type="hidden" name="markCompleteId" id="markCompleteIdInput" value="">
+                <input type="hidden" name="markComplete" value="1">
+            </form>
+            <div class="uSureBtn">
+                <button class="yes" type="button" onclick="submitMarkComplete()">Yes, Complete</button>
+                <button class="no" type="button" onclick="document.getElementById('markCompletePopup').style.display='none'">Go Back</button>
+            </div>
+        </div>
+    </section>
+
     <!-- Logout popup -->
     <section class="popUp" id="logoutPopup" style="display: none;">
         <div class="notif">
@@ -668,8 +645,13 @@ if (isset($_POST['submitPayment'])) {
         const bookings = <?php echo json_encode($bookingRows); ?>;
         const payments = <?php echo json_encode($paymentData); ?>;
 
+        // Tracks pending cancel info for the no-refund flow
+        let pendingCancelId = null;
+        let pendingCancelStatus = null;
+
+        // Format number as Philippine peso using the actual peso sign
         function formatPHP(amount) {
-            return '&#8369;' + parseFloat(amount).toLocaleString('en-PH', {
+            return '₱' + parseFloat(amount).toLocaleString('en-PH', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
@@ -708,6 +690,7 @@ if (isset($_POST['submitPayment'])) {
             document.getElementById('detailEventType').textContent = b.Event_Type;
             document.getElementById('detailAddress').textContent = b.Event_Address;
             document.getElementById('detailBottle').textContent = b.Bottle_Var_Name + ' (' + b.Bottle_Name + ')';
+            document.getElementById('detailMirror').textContent = b.Mirror_Name || 'N/A';
             document.getElementById('detailPerfumes').textContent = b.Perfumes;
             document.getElementById('detailNotes').textContent = b.Event_Notes || 'None';
             document.getElementById('detailStatus').textContent = b.Booking_Status;
@@ -718,24 +701,87 @@ if (isset($_POST['submitPayment'])) {
             document.getElementById('viewDetailSection').style.display = 'none';
         }
 
-        function openCancelModal(id, currentStatus) {
-            const overlay = document.getElementById('cancelReasonOverlay');
+        // Check how many days until the event date (floor so 3 days stays as 3, not rounded up)
+        function getDaysUntilEvent(eventDateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            // Parse as local date by splitting manually to avoid timezone offset issues
+            const parts = eventDateStr.split('-');
+            const eventDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            eventDate.setHours(0, 0, 0, 0);
+            const diffMs = eventDate - today;
+            return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        }
+
+        // Opens cancel modal — checks refund eligibility based on event date
+        function openCancelModal(id, currentStatus, eventDate) {
+            const daysLeft = getDaysUntilEvent(eventDate);
+
+            // Approved + more than 6 days away = eligible for refund
+            if (currentStatus === 'Approved' && daysLeft >= 7) {
+                pendingCancelId = null;
+                pendingCancelStatus = null;
+                showCancelReasonModal(id, 'To Refund');
+                return;
+            }
+
+            // Approved but 6 days or less = no refund, show warning first
+            if (currentStatus === 'Approved' && daysLeft < 7) {
+                pendingCancelId = id;
+                pendingCancelStatus = 'Cancelled';
+                showNoRefundWarning(daysLeft);
+                return;
+            }
+
+            // Pending or To Pay = just cancel, no refund involved
+            pendingCancelId = null;
+            pendingCancelStatus = null;
+            showCancelReasonModal(id, 'Cancelled');
+        }
+
+        // Show the standard cancel reason modal
+        function showCancelReasonModal(id, newStatus) {
             const titleEl = document.getElementById('cancelReasonTitle');
             const subtitleEl = document.getElementById('cancelReasonSubtitle');
-            let newStatus = 'Cancelled';
-            if (currentStatus === 'Approved') {
-                newStatus = 'To Refund';
+
+            if (newStatus === 'To Refund') {
                 titleEl.textContent = 'Request Cancellation & Refund';
-                subtitleEl.textContent = 'This booking has been approved. Cancelling will initiate a refund request. Please state your reason.';
+                subtitleEl.textContent = 'Your event is more than 1 week away. Cancelling will initiate a refund request. Please state your reason.';
             } else {
                 titleEl.textContent = 'Cancel Booking';
                 subtitleEl.textContent = 'Please provide a reason for cancelling this booking.';
             }
+
             document.getElementById('cancelBookingIdInput').value = id;
             document.getElementById('cancelStatusInput').value = newStatus;
             document.getElementById('cancelReasonTextarea').value = '';
             document.getElementById('cancelReasonError').style.display = 'none';
-            overlay.style.display = 'flex';
+            document.getElementById('cancelReasonOverlay').style.display = 'flex';
+        }
+
+        // Show the no-refund policy warning popup
+        function showNoRefundWarning(daysLeft) {
+            const label = daysLeft <= 0 ?
+                'today or has already passed' :
+                daysLeft === 1 ?
+                '1 day away' :
+                daysLeft + ' days away';
+            document.getElementById('noRefundDaysLeft').textContent = label;
+            document.getElementById('noRefundWarningOverlay').style.display = 'flex';
+        }
+
+        function closeNoRefundWarning() {
+            document.getElementById('noRefundWarningOverlay').style.display = 'none';
+            pendingCancelId = null;
+            pendingCancelStatus = null;
+        }
+
+        // Customer confirmed they understand no refund — proceed to reason modal
+        function proceedToNoRefundCancel() {
+            closeNoRefundWarning();
+            if (pendingCancelId !== null) {
+                showCancelReasonModal(pendingCancelId, 'Cancelled');
+            }
         }
 
         function closeCancelModal() {
@@ -754,6 +800,42 @@ if (isset($_POST['submitPayment'])) {
             document.getElementById('cancelReasonForm').submit();
         }
 
+        // Open mark as complete popup — only shows if event end time has already passed
+        function openMarkCompleteModal(id, eventDate, eventTimeEnd) {
+            const parts = eventDate.split('-');
+            const timeParts = eventTimeEnd.split(':');
+            const eventEnd = new Date(
+                parseInt(parts[0]),
+                parseInt(parts[1]) - 1,
+                parseInt(parts[2]),
+                parseInt(timeParts[0]),
+                parseInt(timeParts[1]),
+                0
+            );
+            const now = new Date();
+
+            if (now <= eventEnd) {
+                // Event hasn't ended yet — block it
+                const diff = eventEnd - now;
+                const hoursLeft = Math.floor(diff / (1000 * 60 * 60));
+                const minsLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const timeMsg = hoursLeft > 0 ?
+                    `${hoursLeft}h ${minsLeft}m` :
+                    `${minsLeft} minute(s)`;
+                alert(`You can only mark this as complete after the event ends.\n\nEvent ends in approximately: ${timeMsg}`);
+                return;
+            }
+
+            document.getElementById('markCompleteIdInput').value = id;
+            document.getElementById('markCompleteNote').textContent =
+                'This action cannot be undone. The booking will be moved to your history.';
+            document.getElementById('markCompletePopup').style.display = 'flex';
+        }
+
+        function submitMarkComplete() {
+            document.getElementById('markCompleteForm').submit();
+        }
+
         function openPayModal(id) {
             const b = bookings.find(x => x.Booking_ID_PK == id);
             const p = payments[id] || {};
@@ -761,13 +843,17 @@ if (isset($_POST['submitPayment'])) {
             document.getElementById('payModalBookingId').textContent = '0000' + b.Booking_ID_PK;
             document.getElementById('paymentBookingId').value = id;
             document.getElementById('payModalPackage').textContent = b.Package_Name;
+
             const totalPrice = parseFloat(p.Total_Price || b.Price || 0);
             const addFee = parseFloat(p.Additional_Fee || 0);
             const basePrice = totalPrice - addFee;
             const downpayment = totalPrice * 0.50;
+
+            // Use actual peso sign
             document.getElementById('payModalBasePrice').textContent = formatPHP(basePrice);
             document.getElementById('payModalTotal').textContent = formatPHP(totalPrice);
             document.getElementById('payModalDownpayment').textContent = formatPHP(downpayment);
+
             const feesSection = document.getElementById('additionalFeesSection');
             feesSection.innerHTML = '';
             if (addFee > 0) {
@@ -780,16 +866,31 @@ if (isset($_POST['submitPayment'])) {
                         ${p.Additional_Fee_Description ? `<p class="feeDesc">${p.Additional_Fee_Description}</p>` : ''}
                     </div>`;
             }
+
             const gcashImg = document.getElementById('gcashQrImg');
             gcashImg.src = (p.Gcash_Code && p.Gcash_Code.trim() !== '') ?
                 'uploads/gcash_qr/' + p.Gcash_Code.trim() :
                 'assets/gcash_qr_placeholder.png';
             document.getElementById('gcashNameDisplay').textContent = p.Gcash_Name || '';
             document.getElementById('gcashNumberDisplay').textContent = p.Gcash_Number ? '0' + p.Gcash_Number : '';
+
+            // Reset upload form
             document.getElementById('receiptUpload').value = '';
             document.getElementById('uploadLabelText').textContent = 'Choose image...';
             document.getElementById('receiptPreviewWrapper').style.display = 'none';
             document.getElementById('receiptPreview').src = '';
+
+            // Show existing receipt if already uploaded
+            const existingReceiptSection = document.getElementById('existingReceiptSection');
+            if (p.Customer_Receipt && p.Customer_Receipt.trim() !== '') {
+                existingReceiptSection.style.display = 'block';
+                document.getElementById('existingReceiptImg').src = 'uploads/receipts/' + p.Customer_Receipt.trim();
+                document.getElementById('receiptStatusMsg').textContent = 'Receipt submitted. Waiting for admin confirmation.';
+            } else {
+                existingReceiptSection.style.display = 'none';
+                document.getElementById('receiptStatusMsg').textContent = '';
+            }
+
             document.getElementById('paymentModal').style.display = 'flex';
         }
 

@@ -1,0 +1,315 @@
+/* ============================================================
+   RESPONSIVE STYLES — manageGallery.php
+   Breakpoints: 956px (tablet), 440px (mobile), 360px (small)
+   ============================================================ */
+
+
+/* ══════════════════════════════════════════════════════════════
+   956px — TABLET / NARROW DESKTOP
+   Sidebar collapses to top nav. Toolbar wraps. Grid adjusts.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 956px) {
+
+    /* ── Layout ── */
+    body.adminBG {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    /* ── Sidebar → top nav ── */
+    .asidebar {
+        width: 100%;
+        height: auto;
+        padding: 14px 20px 0;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+    }
+
+    .asidebar h1 {
+        font-size: 1.6rem;
+        padding: 0;
+        margin-bottom: 6px;
+    }
+
+    .roww {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .adminpic {
+        width: 3rem;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    #adminnameemail h3 {
+        font-size: 0.9rem;
+        color: var(--white);
+        margin: 0;
+    }
+
+    #adminnameemail p {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.65);
+        margin: 0;
+    }
+
+    .asidebar hr {
+        border-color: rgba(255, 255, 255, 0.15);
+        margin: 6px 0 0;
+    }
+
+    .asidebar ul {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 0;
+        padding: 6px 0 10px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        list-style: none;
+    }
+
+    .asidebar ul::-webkit-scrollbar { display: none; }
+
+    .asidebar ul li {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .asidebar a {
+        font-size: 0.82rem;
+        padding: 7px 14px;
+        white-space: nowrap;
+        display: block;
+    }
+
+    /* ── Main content ── */
+    .ainfocontainer {
+        margin: 16px 16px 40px;
+        width: auto;
+        padding-top: 0;
+    }
+
+    .ainfocontainer > h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Page header (title + upload button) ── */
+    .galleryPageHeader {
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .galleryPageHeader h2 { font-size: 1.2rem; }
+
+    /* ── Toolbar (date filters + bulk delete) ── */
+    .galleryToolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.85rem;
+    }
+
+    .galleryFilterGroup {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+    }
+
+    .galleryFilterGroup label { font-size: 0.78rem; }
+
+    .galleryFilterGroup input[type="date"] {
+        font-size: 0.78rem;
+        padding: 5px 8px;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        background: #fff;
+        width: 130px;
+    }
+
+    .galleryFilterBtn {
+        font-size: 0.78rem;
+        padding: 6px 12px;
+    }
+
+    .galleryClearBtn {
+        font-size: 0.78rem;
+        padding: 6px 10px;
+    }
+
+    /* Bulk delete button wraps to its own row */
+    .galleryToolbarSpacer { display: none; }
+
+    .galleryBulkDelBtn {
+        font-size: 0.78rem;
+        padding: 6px 12px;
+    }
+
+    /* ── Image count ── */
+    .galleryImageCount {
+        font-size: 0.78rem;
+        margin-bottom: 0.85rem;
+    }
+
+    /* ── Gallery grid — 3 columns ── */
+    .galleryGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+
+    /* ── Modals — bottom sheet ── */
+    .galleryModalOverlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .galleryModalBox {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        padding: 24px 20px 32px;
+        box-sizing: border-box;
+    }
+
+    /* Logout modal — bottom sheet */
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-box {
+        max-width: 100%;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 24px 20px 32px;
+        box-sizing: border-box;
+    }
+
+    .del-btns { gap: 10px; }
+    .del-btns .btn-confirm,
+    .del-btns .btn-cancel { flex: 1; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   440px — MOBILE
+   Compact sidebar, 2-column grid, stacked toolbar.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 440px) {
+
+    /* ── Sidebar ── */
+    .asidebar { padding: 12px 16px 0; }
+    .asidebar h1 { font-size: 1.4rem; }
+    .adminpic { width: 2.5rem; }
+    #adminnameemail h3 { font-size: 0.85rem; }
+    #adminnameemail p  { font-size: 0.72rem; }
+    .asidebar ul  { padding: 6px 0 8px; }
+    .asidebar a   { font-size: 0.72rem; padding: 6px 10px; }
+    .asidebar a:hover { border-radius: 6px; }
+
+    /* ── Main ── */
+    .ainfocontainer { margin: 12px 12px 32px; }
+    .ainfocontainer > h1 { font-size: 1.6rem; margin-bottom: 12px; }
+
+    /* ── Page header ── */
+    .galleryPageHeader { gap: 8px; margin-bottom: 0.85rem; }
+    .galleryPageHeader h2 { font-size: 1.1rem; }
+    .btn-add { font-size: 0.72rem; padding: 6px 10px; }
+    .btn-add .material-icons { font-size: 0.9rem; }
+
+    /* ── Toolbar — stack into two rows ── */
+    .galleryToolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Date pair on one row */
+    .galleryToolbar > form,
+    .galleryFilterGroup { flex-shrink: 0; }
+
+    /* Wrap both filter groups in one row */
+    .galleryToolbar {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .galleryFilterGroup input[type="date"] {
+        width: 110px;
+        font-size: 0.72rem;
+    }
+
+    .galleryFilterGroup label { font-size: 0.72rem; }
+
+    .galleryFilterBtn,
+    .galleryClearBtn {
+        font-size: 0.72rem;
+        padding: 6px 10px;
+    }
+
+    .galleryBulkDelBtn {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+
+    /* ── Image count ── */
+    .galleryImageCount { font-size: 0.74rem; }
+
+    /* ── Gallery grid — 2 columns ── */
+    .galleryGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem;
+    }
+
+    /* Upload card text */
+    .galleryUploadLabel { font-size: 0.7rem; }
+    .galleryCard.galleryUploadCard .material-icons { font-size: 1.6rem; }
+
+    /* Card overlay actions */
+    .galleryCardDate { font-size: 0.65rem; }
+    .galleryCardActions button { padding: 0.2rem; }
+    .galleryCardActions .material-icons { font-size: 0.95rem; }
+
+    /* Modals */
+    .galleryModalBox { padding: 20px 16px 28px; }
+    .galleryModalBox h3 { font-size: 1rem; }
+    .galleryModalBox p  { font-size: 0.82rem; }
+    .galConfirmBtn,
+    .galCancelBtn { padding: 8px 16px; font-size: 0.82rem; flex: 1; }
+    .galleryModalBtns { gap: 8px; }
+
+    .modal-box { max-height: 80vh; padding: 20px 16px 28px; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   360px — VERY SMALL PHONES
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+
+    .ainfocontainer > h1 { font-size: 1.3rem; }
+
+    .galleryGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .galleryFilterGroup input[type="date"] { width: 95px; font-size: 0.68rem; }
+
+    .galleryModalBox { padding: 18px 14px 24px; }
+    .modal-box { padding: 18px 14px 24px; }
+}

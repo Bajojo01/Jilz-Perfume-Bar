@@ -1,5 +1,30 @@
 <?php
+
 session_start();
+//profile pic
+function getAvatarColor($username)
+{
+    $palette = [
+        ['bg' => '#EEEDFE', 'text' => '#3C3489'],
+        ['bg' => '#E1F5EE', 'text' => '#085041'],
+        ['bg' => '#FAECE7', 'text' => '#712B13'],
+        ['bg' => '#FBEAF0', 'text' => '#72243E'],
+        ['bg' => '#E6F1FB', 'text' => '#0C447C'],
+        ['bg' => '#EAF3DE', 'text' => '#27500A'],
+        ['bg' => '#FAEEDA', 'text' => '#633806'],
+        ['bg' => '#FCF0F0', 'text' => '#791F1F'],
+    ];
+    $hash = 0;
+    foreach (str_split($username) as $char) {
+        $hash = ord($char) + (($hash << 5) - $hash);
+    }
+    return $palette[abs($hash) % count($palette)];
+}
+
+$username   = $_SESSION['Username'] ?? 'Guest';
+$avatarColor = getAvatarColor($username);
+$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+
 require("db.php");
 
 if (isset($_GET['logout'])) {
@@ -36,6 +61,8 @@ $myBookingsQuery = "SELECT
         bv.Bottle_Img,
         bs.Bar_Name,
         bs.Bar_Img,
+        sm.Mirror_Name,
+        sm.Mirror_Img,
         ui.First_Name,
         ui.Last_Name,
         ui.Phone_No,
@@ -56,11 +83,12 @@ $myBookingsQuery = "SELECT
     JOIN Bottle_Variants bv ON b.Bottle_Var_ID_FK = bv.Bottle_Var_ID_PK
     JOIN Bottle bt ON bv.Bottle_ID_FK = bt.Bottle_ID_PK
     JOIN Bar_Setup bs ON b.Bar_Setup_ID_FK = bs.Bar_Setup_ID_PK
+    JOIN Selfie_Mirror sm ON b.Selfie_Mirror_ID_FK = sm.Selfie_Mirror_ID_PK
     JOIN Booking_Perfume bpf ON b.Booking_ID_PK = bpf.Booking_ID_FK
     JOIN Perfume p ON bpf.Perfume_ID_FK = p.Perfume_ID_PK
     JOIN User_Information ui ON b.User_ID_FK = ui.User_ID_PK
     LEFT JOIN Booking_Payment bp_pay ON b.Booking_ID_PK = bp_pay.Booking_ID_FK
-    LEFT JOIN booking_cancelled bc ON b.Booking_ID_PK = bc.Booking_ID_FK AND bc.Refund_Status = 'Cancelled'
+    LEFT JOIN Booking_Cancelled bc ON b.Booking_ID_PK = bc.Booking_ID_FK AND bc.Refund_Status = 'Cancelled'
     WHERE b.User_ID_FK = " . intval($_SESSION['UserID']) . " AND b.Booking_Status IN ('Cancelled', 'To Refund', 'Completed')
     GROUP BY 
         b.Booking_ID_PK, b.Event_Type, b.Event_Address, b.Event_Date,
@@ -68,6 +96,7 @@ $myBookingsQuery = "SELECT
         b.Created_At, pk.Package_ID_PK, pk.Package_Name, pk.No_of_Bottles, pk.No_of_Scent,
         pk.Price, pk.Package_Img, bt.Bottle_Name, bt.Bottle_Size,
         bv.Bottle_Var_Name, bv.Bottle_Img, bs.Bar_Name, bs.Bar_Img,
+        sm.Mirror_Name, sm.Mirror_Img,
         ui.First_Name, ui.Last_Name, ui.Phone_No, ui.Email,
         bp_pay.Refund_Receipt, bp_pay.Customer_Receipt, bp_pay.Gcash_Code,
         bp_pay.Gcash_Number, bp_pay.Gcash_Name, bp_pay.Total_Price,
@@ -94,13 +123,13 @@ while ($row = mysqli_fetch_assoc($myBookings)) {
 $userId = intval($_SESSION['UserID']);
 
 $perfumeRatingsMap = [];
-$prResult = mysqli_query($conn, "SELECT Perfume_ID_FK, Rating FROM perfume_ratings WHERE User_ID_FK = $userId");
+$prResult = mysqli_query($conn, "SELECT Perfume_ID_FK, Rating FROM Perfume_Ratings WHERE User_ID_FK = $userId");
 while ($pr = mysqli_fetch_assoc($prResult)) {
     $perfumeRatingsMap[$pr['Perfume_ID_FK']] = $pr['Rating'];
 }
 
 $packageRatingsMap = [];
-$pkrResult = mysqli_query($conn, "SELECT Package_ID_FK, Rating FROM package_ratings WHERE User_ID_FK = $userId");
+$pkrResult = mysqli_query($conn, "SELECT Package_ID_FK, Rating FROM Package_Ratings WHERE User_ID_FK = $userId");
 while ($pkr = mysqli_fetch_assoc($pkrResult)) {
     $packageRatingsMap[$pkr['Package_ID_FK']] = $pkr['Rating'];
 }
@@ -112,11 +141,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
         $rating    = intval($_POST['rating']);
         $desc      = mysqli_real_escape_string($conn, $_POST['description'] ?? '');
         if ($rating >= 1 && $rating <= 5) {
-            $check = mysqli_query($conn, "SELECT Perfume_Rating_ID_PK FROM perfume_ratings WHERE Perfume_ID_FK = $perfumeId AND User_ID_FK = $userId");
+            $check = mysqli_query($conn, "SELECT Perfume_Rating_ID_PK FROM Perfume_Ratings WHERE Perfume_ID_FK = $perfumeId AND User_ID_FK = $userId");
             if (mysqli_num_rows($check) > 0) {
-                mysqli_query($conn, "UPDATE perfume_ratings SET Rating = $rating, Description = '$desc' WHERE Perfume_ID_FK = $perfumeId AND User_ID_FK = $userId");
+                mysqli_query($conn, "UPDATE Perfume_Ratings SET Rating = $rating, Description = '$desc' WHERE Perfume_ID_FK = $perfumeId AND User_ID_FK = $userId");
             } else {
-                mysqli_query($conn, "INSERT INTO perfume_ratings (Perfume_ID_FK, User_ID_FK, Rating, Description) VALUES ($perfumeId, $userId, $rating, '$desc')");
+                mysqli_query($conn, "INSERT INTO Perfume_Ratings (Perfume_ID_FK, User_ID_FK, Rating, Description) VALUES ($perfumeId, $userId, $rating, '$desc')");
             }
         }
         header("Location: " . $_SERVER['PHP_SELF']);
@@ -127,11 +156,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
         $rating    = intval($_POST['rating']);
         $desc      = mysqli_real_escape_string($conn, $_POST['description'] ?? '');
         if ($rating >= 1 && $rating <= 5) {
-            $check = mysqli_query($conn, "SELECT Package_Rating_ID_PK FROM package_ratings WHERE Package_ID_FK = $packageId AND User_ID_FK = $userId");
+            $check = mysqli_query($conn, "SELECT Package_Rating_ID_PK FROM Package_Ratings WHERE Package_ID_FK = $packageId AND User_ID_FK = $userId");
             if (mysqli_num_rows($check) > 0) {
-                mysqli_query($conn, "UPDATE package_ratings SET Rating = $rating, Description = '$desc' WHERE Package_ID_FK = $packageId AND User_ID_FK = $userId");
+                mysqli_query($conn, "UPDATE Package_Ratings SET Rating = $rating, Description = '$desc' WHERE Package_ID_FK = $packageId AND User_ID_FK = $userId");
             } else {
-                mysqli_query($conn, "INSERT INTO package_ratings (Package_ID_FK, User_ID_FK, Rating, Description) VALUES ($packageId, $userId, $rating, '$desc')");
+                mysqli_query($conn, "INSERT INTO Package_Ratings (Package_ID_FK, User_ID_FK, Rating, Description) VALUES ($packageId, $userId, $rating, '$desc')");
             }
         }
         header("Location: " . $_SERVER['PHP_SELF']);
@@ -166,7 +195,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
         </div>
 
         <div class="profileDrawerUser">
-            <img src="assets/user.png" alt="Profile">
+            <div style="
+    width: 44px; height: 44px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500; font-size: 18px; flex-shrink: 0; padding-bottom: 10srem;
+"><?= htmlspecialchars($avatarLetter) ?></div>
             <span><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></span>
         </div>
 
@@ -186,9 +221,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
     <div class="mypsidebar">
         <h1>Profile</h1>
         <div class="roww">
-            <img src="assets/Logo_Tentative.png" alt="" class="profilepic">
+            <div style="
+    width: 70px; height: 70px; border-radius: 50%;
+    background: <?= $avatarColor['bg'] ?>;
+    color: <?= $avatarColor['text'] ?>;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 1000; font-size: 35px; flex-shrink: 0;
+"><?= htmlspecialchars($avatarLetter) ?></div>
             <div class="usernameemail">
-                <h3>Username</h3>
+                <h3><?php echo isset($_SESSION['Username']) ? htmlspecialchars($_SESSION['Username']) : 'Guest'; ?></h3>
             </div>
         </div>
         <hr>
@@ -240,6 +281,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
                                 <div class="cancellationReasonWrap">
                                     <span class="cancellationReasonLabel">Cancellation Reason</span>
                                     <p class="cancellationReasonText"><?php echo htmlspecialchars($booking['Cancellation_Reason']); ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if ($booking['Booking_Status'] === 'To Refund' && !empty($booking['Refund_Receipt'])): ?>
+                                <div class="refundReceiptWrap">
+                                    <span class="refundReceiptLabel">&#128176; Refund Receipt from Admin</span>
+                                    <img
+                                        class="refundReceiptThumb"
+                                        src="<?php echo htmlspecialchars($booking['Refund_Receipt']); ?>"
+                                        alt="Refund Receipt"
+                                        onclick="openRefundReceiptOverlay('<?php echo htmlspecialchars(addslashes($booking['Refund_Receipt'])); ?>')">
+                                    <p class="refundReceiptNote">Click the image to view full size.</p>
                                 </div>
                             <?php endif; ?>
 
@@ -357,6 +410,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
                         <p class="detailLabel">BOTTLE</p>
                         <p class="detailValue" id="detailBottle"></p>
                     </div>
+                    <div class="infos">
+                        <p class="detailLabel">SELFIE MIRROR</p>
+                        <p class="detailValue" id="detailMirror"></p>
+                    </div>
                     <div class="infos fullWidth">
                         <p class="detailLabel">PERFUMES SELECTED</p>
                         <p class="detailValue" id="detailPerfumes"></p>
@@ -380,11 +437,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
             <div class="detailSection" id="detailRefundSection" style="display:none;">
                 <div class="refundImgWrap">
                     <p class="refundImgLabel">Refund Receipt / Proof</p>
-                    <img id="detailRefundImg" src="" alt="Refund image">
+                    <img id="detailRefundImg" src="" alt="Refund image" style="cursor:pointer;" onclick="openRefundReceiptOverlay(this.src)">
                     <p class="refundNote">This booking has been requested for a refund.</p>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Refund receipt fullscreen overlay -->
+    <div id="refundReceiptOverlay" onclick="closeRefundReceiptOverlay()">
+        <img id="refundReceiptOverlayImg" src="" alt="Refund Receipt">
+        <button class="refundOverlayClose" onclick="closeRefundReceiptOverlay()">&#10005;</button>
     </div>
 
     <!-- Logout popup -->
@@ -449,6 +512,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
             document.getElementById('detailEventtype').textContent = b.Event_Type;
             document.getElementById('detailAddress').textContent = b.Event_Address;
             document.getElementById('detailBottle').textContent = b.Bottle_Var_Name + ' (' + b.Bottle_Name + ')';
+            document.getElementById('detailMirror').textContent = b.Mirror_Name || 'N/A';
             document.getElementById('detailPerfumes').textContent = b.Perfumes;
             document.getElementById('detailNotes').textContent = b.Event_Notes || 'None';
             document.getElementById('detailStatus').textContent = b.Booking_Status;
@@ -487,6 +551,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? null) === 'POST' && isset($_POST['ratingActio
             document.getElementById('viewDetailSection').style.display = 'none';
         }
 
+        /* ── Refund Receipt Overlay ── */
+        function openRefundReceiptOverlay(src) {
+            document.getElementById('refundReceiptOverlayImg').src = src;
+            document.getElementById('refundReceiptOverlay').classList.add('active');
+        }
+
+        function closeRefundReceiptOverlay() {
+            document.getElementById('refundReceiptOverlay').classList.remove('active');
+        }
+
+        /* ── Rating Modal ── */
         let currentRatingType = null;
         let currentRatingTargetId = null;
         let currentRatingValue = 0;
